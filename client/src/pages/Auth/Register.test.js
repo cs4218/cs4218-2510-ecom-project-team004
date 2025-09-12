@@ -96,4 +96,22 @@ describe('Register Component', () => {
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith('Already Register please login');
   });
+
+  it('should display error message on empty response', async () => {
+    axios.post.mockResolvedValueOnce({});
+
+    submitForm();
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+  });
+
+  it('should display error message on promise rejection', async () => {
+    axios.post.mockRejectedValueOnce();
+
+    submitForm();
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+  });
 });
