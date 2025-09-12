@@ -24,14 +24,22 @@ jest.mock('../../context/search', () => ({
 
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));  // Mock useCategory hook to return null state and a mock function
 
-  Object.defineProperty(window, 'localStorage', {
-    value: {
-      setItem: jest.fn(),
-      getItem: jest.fn(),
-      removeItem: jest.fn(),
-    },
-    writable: true,
-  });
+// Mock navigate function in useNavigate hook
+const mockNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({  
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+  }));
+
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    setItem: jest.fn(),
+    getItem: jest.fn(),
+    removeItem: jest.fn(),
+  },
+  writable: true,
+});
 
 window.matchMedia = window.matchMedia || function() {
     return {
@@ -70,6 +78,7 @@ describe('Register Component', () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledWith('Register Successfully, please login');
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
   it('should display error message on failed registration', async () => {
