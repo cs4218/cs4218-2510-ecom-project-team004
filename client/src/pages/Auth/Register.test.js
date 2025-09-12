@@ -73,7 +73,10 @@ describe('Register Component', () => {
   });
 
   it('should display error message on failed registration', async () => {
-    axios.post.mockRejectedValueOnce({ message: 'User already exists' });
+    axios.post.mockResolvedValueOnce({ 
+      data: {
+        success: false,
+        message: 'Already Register please login'} });
 
     const { getByText, getByPlaceholderText } = render(
         <MemoryRouter initialEntries={['/register']}>
@@ -94,6 +97,6 @@ describe('Register Component', () => {
     fireEvent.click(getByText('REGISTER'));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+    expect(toast.error).toHaveBeenCalledWith('Already Register please login');
   });
 });
