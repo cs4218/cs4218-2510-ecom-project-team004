@@ -48,8 +48,20 @@ window.matchMedia = window.matchMedia || function() {
       removeListener: function() {}
     };
   };
-   
+
+const formData = {
+  name: 'John Doe',
+  email: 'test@example.com',
+  password: 'password123',
+  phone: '1234567890',
+  address: '123 Street',
+  DOB: '2000-01-01',
+  answer: 'Football',
+}
+
 function submitForm() {
+  const { name, email, password, phone, address, DOB, answer } = formData;
+
   const { getByText, getByPlaceholderText } = render(
         <MemoryRouter initialEntries={['/register']}>
           <Routes>
@@ -58,13 +70,13 @@ function submitForm() {
         </MemoryRouter>
       );
 
-    fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
-    fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
-    fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
-    fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
-    fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
-    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
-    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: name } });
+    fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: email } });
+    fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: password } });
+    fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: phone } });
+    fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: address } });
+    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: DOB } });
+    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: answer } });
 
     fireEvent.click(getByText('REGISTER'));
 }
@@ -73,6 +85,14 @@ function submitForm() {
 describe('Register Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should call registration API', async () => {
+    axios.post.mockResolvedValueOnce({ data: { success: true } });
+
+    submitForm();
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/api/v1/auth/register', formData));
   });
 
   it('should register the user successfully', async () => {
