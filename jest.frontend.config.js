@@ -21,6 +21,7 @@ export default {
 
   // only run these tests
   testMatch: [
+      "<rootDir>/models/userModel.test.js", 
       "<rootDir>/client/src/pages/Auth/*.test.js",
       "<rootDir>/client/src/pages/user/Dashboard.test.js", 
       "<rootDir>/client/src/components/UserMenu.test.js",
@@ -30,6 +31,7 @@ export default {
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
+      "models/userModel.js", 
       "client/src/pages/Auth/**", 
       "client/src/pages/user/Dashboard.js", 
       "client/src/components/UserMenu.js", 
