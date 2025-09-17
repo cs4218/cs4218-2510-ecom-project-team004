@@ -1,4 +1,7 @@
 import { registerController } from "./authController";
+import userModel from "../models/userModel";
+
+jest.mock("../models/userModel");
 
 describe("Register Controller", () => {
     const mockReq = {
@@ -12,10 +15,14 @@ describe("Register Controller", () => {
         }
     }
 
-    const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        send: jest.fn()
-    }
+    let mockRes = {}
+
+    beforeEach(() => {
+        mockRes = {
+            send: jest.fn(),
+            status: jest.fn(() => mockRes) // To allow chaining.
+        }
+    })
 
     afterEach(() => {
         jest.resetAllMocks();
@@ -74,4 +81,15 @@ describe("Register Controller", () => {
 
         expect(mockRes.send).toHaveBeenCalledWith({ message: "Answer is Required" });
     })
+
+    it("Should return OK for successful registration", async () => {
+        // Assumes no conflicting existing user.
+        userModel.findOne.mockResolvedValue(null);
+
+        await registerController(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(201);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", true);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "User Register Successfully");
+    }, 30000)
 })
