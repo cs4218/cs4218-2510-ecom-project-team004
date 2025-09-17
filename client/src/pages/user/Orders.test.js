@@ -2,7 +2,6 @@ import React from "react";
 import axios from "axios";
 import { render, waitFor } from "@testing-library/react";
 import Orders from "./Orders";
-import { useAuth } from "../../context/auth";
 import { MemoryRouter } from "react-router-dom";
 import moment from "moment";
 
@@ -48,7 +47,7 @@ describe("Orders component", () => {
     it("should call API and render orders", async () => {
         axios.get.mockResolvedValueOnce({ data: mockOrders });
 
-        const { getByText, findByText } = render(
+        const { getByText } = render(
             <MemoryRouter>
                 <Orders/>
             </MemoryRouter>
@@ -64,5 +63,24 @@ describe("Orders component", () => {
         expect(getByText("fedcba")).toBeInTheDocument();
         expect(getByText(moment(mockOrders[0].createAt).fromNow())).toBeInTheDocument();
         expect(getByText("Success")).toBeInTheDocument();
+    })
+
+    it("should call API and not render any orders if empty", async () => {
+        axios.get.mockResolvedValueOnce({ data: [] });
+
+        const { getByText } = render(
+            <MemoryRouter>
+                <Orders/>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            // Wait for the "all orders" text to be rendered.
+            expect(getByText("All Orders")).toBeInTheDocument();
+        });
+
+        // There should be no children of the parent of this element.
+        const all_orders_parent = getByText("All Orders").parentNode;
+        expect(all_orders_parent.children).toHaveLength(1);
     })
 })
