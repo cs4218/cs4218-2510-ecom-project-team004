@@ -1,7 +1,12 @@
-import { registerController, loginController } from "./authController";
+import { registerController, loginController, forgotPasswordController } from "./authController";
 import userModel from "../models/userModel";
+import { comparePassword } from "../helpers/authHelper";
+import JWT from "jsonwebtoken";
 
 jest.mock("../models/userModel");
+jest.mock("jsonwebtoken");
+
+jest.mock("../helpers/authHelper");
 
 describe("Register Controller", () => {
     const mockReq = {
@@ -194,10 +199,123 @@ describe("Login Controller", () => {
         foundUser.password = "WRONG PASSWORD";
         userModel.findOne.mockResolvedValue(foundUser);
 
+        comparePassword.mockResolvedValue(false);
+
         await loginController(mockReq, mockRes);
 
         expect(mockRes.status).toHaveBeenCalledWith(401);
         expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", false);
         expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Invalid Password");
+    })
+
+    it("Should authenticate successfully if email and password matches", async () => {
+        const foundUser = { ...mockReq.body };
+        userModel.findOne.mockResolvedValue(foundUser);
+
+        comparePassword.mockResolvedValue(true);
+
+        await loginController(mockReq, mockRes);
+
+        expect(JWT.sign).toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", true);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "login successfully");
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("user");
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("token");
+    })
+
+    it("Should report an error if an error is reached", async () => {
+        userModel.findOne.mockImplementation(() => { throw new Error(); });
+
+        await loginController(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(500);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", false);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Error in login");
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("error");
+    })
+})
+
+describe("Forgot Password Controller", () => {
+    const mockReq = {
+        body: {
+            email: "abc@def.com",
+            answer: "ANSWER",
+            newPassword: "NEW PASWORD"
+        }
+    }
+
+    let mockRes = {}
+
+    beforeEach(() => {
+        mockRes = {
+            send: jest.fn(),
+            status: jest.fn(() => mockRes) // To allow chaining.
+        }
+    })
+
+    afterEach(() => {
+        jest.resetAllMocks();
+    })
+
+    it("Should return an error if email is missing", async () => {
+        const req = { body: { ...mockReq.body } };
+        delete req.body.email;
+
+        await forgotPasswordController(req, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Email is required");
+    })
+
+    it("Should return an error if answer is missing", async () => {
+        const req = { body: { ...mockReq.body } };
+        delete req.body.answer;
+
+        await forgotPasswordController(req, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Answer is required");
+    })
+
+    it("Should return an error if new password is missing", async () => {
+        const req = { body: { ...mockReq.body } };
+        delete req.body.newPassword;
+
+        await forgotPasswordController(req, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "New Password is required");
+    })
+
+    it("Should return an error if no user is found", async () => {
+        userModel.findOne.mockResolvedValue(null);
+
+        await forgotPasswordController(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", false);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Wrong Email Or Answer");
+    })
+
+    it("Should update the uesr profile if authentication succeeds", async () => {
+        userModel.findOne.mockResolvedValue(mockReq.body);
+
+        await forgotPasswordController(mockReq, mockRes);
+
+        expect(userModel.findByIdAndUpdate).toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", true);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Password Reset Successfully");
+    })
+
+    it("Should report an error when an error is encountered", async () => {
+        userModel.findOne.mockImplementation(() => { throw new Error(); });
+        await forgotPasswordController(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(500);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", false);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Something went wrong");
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("error");
     })
 })
