@@ -14,7 +14,8 @@ export const requireSignIn = async (req, res, next) => {
         console.log(error);
         return res.status(401).send({
             success: false,
-            message: "UnAuthorized Access",
+            error,
+            message: "Unauthorized Access",
         });
     }
 };
@@ -26,7 +27,7 @@ export const isAdmin = async (req, res, next) => {
         if(user.role !== 1) {
             return res.status(401).send({
                 success: false,
-                message: "UnAuthorized Access",
+                message: "Unauthorized Access",
             });
         } else {
             next();
