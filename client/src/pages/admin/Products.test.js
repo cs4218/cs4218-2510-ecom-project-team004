@@ -1,3 +1,4 @@
+// The tests below are generated with help from GenAI
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
