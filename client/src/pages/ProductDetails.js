@@ -62,7 +62,7 @@ const ProductDetails = () => {
             })}
           </h6>
           <h6>Category : {product?.category?.name}</h6>
-          <button class="btn btn-secondary ms-1">ADD TO CART</button>
+          <button className="btn btn-secondary ms-1">ADD TO CART</button> {/*FIXED: class --> className*/} {/*SHOULD UNIT TEST THAT THIS BUTTON DOES SOMETHING?*/}
         </div>
       </div>
       <hr />
@@ -99,7 +99,7 @@ const ProductDetails = () => {
                   >
                     More Details
                   </button>
-                  {/* <button
+                  {/* <button   
                   className="btn btn-dark ms-1"
                   onClick={() => {
                     setCart([...cart, p]);
@@ -111,7 +111,7 @@ const ProductDetails = () => {
                   }}
                 >
                   ADD TO CART
-                </button> */}
+                </button> */} {/*This should be the correct button implementation?*/}
                 </div>
               </div>
             </div>
