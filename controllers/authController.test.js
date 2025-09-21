@@ -1,4 +1,4 @@
-import { registerController, loginController, forgotPasswordController, updateProfileController, getOrdersController, getAllOrdersController } from "./authController";
+import { registerController, loginController, forgotPasswordController, updateProfileController, getOrdersController, getAllOrdersController, orderStatusController } from "./authController";
 import userModel from "../models/userModel";
 import orderModel from "../models/orderModel";
 import { comparePassword, hashPassword } from "../helpers/authHelper";
@@ -517,6 +517,52 @@ describe("Get All Orders Controller", () => {
         expect(mockRes.status).toHaveBeenCalledWith(500);
         expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", false);
         expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Error While Getting Orders");
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("error");
+    })
+})
+
+describe("Order Status Controller", () => {
+    let mockOrderModel = { }
+    const mockReq = {
+        params: {
+            orderId: "123"
+        },
+        body: {
+            status: "STATUS"
+        }
+    }
+
+    let mockRes = {}
+
+    beforeEach(() => {
+        mockRes = {
+            json: jest.fn(),
+            status: jest.fn(() => mockRes),
+            send: jest.fn()
+        }
+    })
+
+    afterEach(() => {
+        jest.resetAllMocks();
+    })
+
+    it("Should return the list of orders after status is updated", async () => {
+        const mockOrders = [ { _id: "123", products: [], buyer: {}, status: "NEW STATUS" } ];
+        orderModel.findByIdAndUpdate.mockResolvedValue(mockOrders);
+
+        await orderStatusController(mockReq, mockRes);
+
+        expect(mockRes.json).toHaveBeenCalledWith(mockOrders);
+    })
+
+    it("Should report an error when an error is encountered", async () => {
+        orderModel.findByIdAndUpdate.mockImplementation(() => { throw new Error(); });
+
+        await orderStatusController(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(500);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("success", false);
+        expect(mockRes.send.mock.calls[0][0]).toHaveProperty("message", "Error While Updating Order");
         expect(mockRes.send.mock.calls[0][0]).toHaveProperty("error");
     })
 })
