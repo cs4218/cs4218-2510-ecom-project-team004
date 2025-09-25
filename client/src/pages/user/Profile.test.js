@@ -1,7 +1,9 @@
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import Profile from "./Profile";
+import axios from "axios";
+import { useAuth } from "../../context/auth";
 
 jest.mock("axios");
 
@@ -28,5 +30,35 @@ describe("Profile page", () => {
         );
 
         expect(getByText("USER PROFILE")).toBeInTheDocument();
+    })
+
+    it("Should display user information correctly", async () => {
+        const mockUser = {
+            name: "NAME",
+            email: "test@abc.com",
+            password: "PASSWORD",
+            phone: "81234567",
+            address: "ADDRESS"
+        };
+
+        useAuth.mockReturnValue([{ user: mockUser }, jest.fn()]);
+
+        const { getByPlaceholderText, findByText } = render(
+            <MemoryRouter>
+                <Profile/>
+            </MemoryRouter>
+        );
+
+        // Wait for getEffect() to return and update the React-controlled text fields.
+        // Assume mockUser.name returns correctly; otherwise, it'll fail the later tests anyway.
+        await waitFor(() => {
+            expect(getByPlaceholderText("Enter Your Name")).toHaveValue(mockUser.name);
+        })
+
+        expect(getByPlaceholderText("Enter Your Name")).toHaveValue(mockUser.name);
+        expect(getByPlaceholderText("Enter Your Email")).toBeInTheDocument(mockUser.email);
+        expect(getByPlaceholderText("Enter Your Password")).toBeInTheDocument(mockUser.password);
+        expect(getByPlaceholderText("Enter Your Phone")).toBeInTheDocument(mockUser.phone);
+        expect(getByPlaceholderText("Enter Your Address")).toBeInTheDocument(mockUser.address);
     })
 })
