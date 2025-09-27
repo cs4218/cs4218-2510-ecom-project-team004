@@ -9,8 +9,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-//payment gateway
-var gateway = new braintree.BraintreeGateway({
+// Braintree Gateway Configuration
+const gateway = new braintree.BraintreeGateway({
   environment: braintree.Environment.Sandbox,
   merchantId: process.env.BRAINTREE_MERCHANT_ID,
   publicKey: process.env.BRAINTREE_PUBLIC_KEY,
@@ -326,52 +326,92 @@ export const productCategoryController = async (req, res) => {
   }
 };
 
-//payment gateway api
-//token
+// Payment Gateway API
+// Generate Token
 export const braintreeTokenController = async (req, res) => {
   try {
-    gateway.clientToken.generate({}, function (err, response) {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(response);
-      }
+    const response = await new Promise((resolve, reject) => {
+      gateway.clientToken.generate({}, (err, resp) => {
+        if (err) reject(new Error(err));
+        else resolve(resp);
+      });
     });
+
+    return res.send(response);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).send({ error: "Failed to generate token" });
   }
 };
 
-//payment
+// Process Payment
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
-    let total = 0;
-    cart.map((i) => {
-      total += i.price;
-    });
-    let newTransaction = gateway.transaction.sale(
+
+    // Validate cart existence and non-empty
+    if (!cart || cart.length === 0)
+      return res.status(400).send({ error: "Cart cannot be empty" });
+
+    // Validate nonce
+    if (!nonce || typeof nonce !== "string" || nonce.trim() === "") {
+      return res.status(400).send({ error: "Payment nonce required" });
+    }
+
+    // Validate each price in the cart
+    for (const item of cart) {
+      const price = Number(item.price);
+
+      // Must be a valid number and non-negative
+      if (isNaN(price) || price < 0) {
+        return res.status(400).send({ error: "Invalid price in cart" });
+      }
+    }
+
+    // Calculate total amount
+    const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    // Round to 2 decimal places to avoid floating point issues
+    const roundedTotal = Math.round((total + Number.EPSILON) * 100) / 100;
+    // Convert to string with 2 decimal places (Braintree requirement)
+    const amountAsString = roundedTotal.toFixed(2);
+
+    // Call Braintree API to process payment
+    gateway.transaction.sale(
       {
-        amount: total,
+        amount: amountAsString,
         paymentMethodNonce: nonce,
         options: {
           submitForSettlement: true,
         },
       },
-      function (error, result) {
-        if (result) {
-          const order = new orderModel({
+      async (error, result) => {
+        if (error) {
+          return res.status(500).send({ error: error.message });
+        }
+
+        if (!result.success) {
+          return res.status(500).send({
+            error: "Transaction failed",
+            details: result,
+          });
+        }
+
+        try {
+          await new orderModel({
             products: cart,
             payment: result,
             buyer: req.user._id,
           }).save();
-          res.json({ ok: true });
-        } else {
-          res.status(500).send(error);
+
+          return res.json({ ok: true });
+        } catch (dbError) {
+          console.error("Database error while saving order:", dbError);
+          return res.status(500).send({ error: "Failed to save order" });
         }
       }
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
