@@ -30,6 +30,7 @@ export default {
   collectCoverageFrom: [
     "client/src/pages/Auth/**",
     "client/src/pages/Contact.js",
+    "client/src/pages/Policy.js",
   ],
   coverageThreshold: {
     global: {
