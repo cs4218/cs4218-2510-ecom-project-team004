@@ -11,6 +11,10 @@ describe('Require Sign In', () => {
         jest.clearAllMocks();
     })
 
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it('should check signed in status and move to next middleware if successful', async () => {
         const req = getMockReq({ headers: {authorization: 'token'} });
         const { res, next } = getMockRes();
@@ -28,11 +32,14 @@ describe('Require Sign In', () => {
         const req = getMockReq({ headers: {} });
         const { res, next } = getMockRes();
         JWT.verify.mockImplementation(() => { throw 'Error verifying token' });
+        const logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});
 
         await requireSignIn(req, res, next);
 
         expect(JWT.verify).toHaveBeenCalledTimes(1);   // should check if signed in
         expect(req).not.toHaveProperty('user');        // should not have user info
+        expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
+        expect(logSpy).toHaveBeenCalledWith('Error verifying token');
         expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ 
             success: false, 
@@ -45,6 +52,10 @@ describe('Require Sign In', () => {
 describe('Is Admin', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     it('should move to next middleware when user is admin', async () => {
@@ -76,11 +87,14 @@ describe('Is Admin', () => {
         const req = getMockReq({ user: {_id: 'fakeId'} });
         const { res, next } = getMockRes();
         userModel.findById.mockRejectedValueOnce('Error when checking user');
+        const logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});
         
         await isAdmin(req, res, next);
 
         expect(userModel.findById).toHaveBeenCalledTimes(1);    // should check user
         expect(userModel.findById).toHaveBeenCalledWith('fakeId');
+        expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
+        expect(logSpy).toHaveBeenCalledWith('Error when checking user');
         expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ 
             success: false, 
