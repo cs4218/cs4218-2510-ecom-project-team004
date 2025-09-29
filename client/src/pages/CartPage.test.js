@@ -168,9 +168,7 @@ describe("CartPage", () => {
     ]);
 
     const removeButton = screen.getByText("Remove");
-    await act(async () => {
-      fireEvent.click(removeButton);
-    });
+    fireEvent.click(removeButton);
 
     await waitFor(async () => {
       expect(mockSetCart).toHaveBeenCalledWith([
@@ -191,9 +189,7 @@ describe("CartPage", () => {
     ]);
 
     const removeButton = screen.getByText("Remove");
-    await act(async () => {
-      fireEvent.click(removeButton);
-    });
+    fireEvent.click(removeButton);
 
     await waitFor(async () => {
       expect(errorSpy).toHaveBeenCalledWith(
@@ -280,10 +276,7 @@ describe("CartPage", () => {
     });
 
     const button = await screen.findByText(/make payment/i);
-
-    await act(async () => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(mockSetCart).toHaveBeenCalledWith([]);
@@ -319,9 +312,7 @@ describe("CartPage", () => {
 
     const button = await screen.findByText(/make payment/i);
 
-    await act(async () => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(console.log).toHaveBeenCalledWith("Payment failed:", mockError);
@@ -350,9 +341,7 @@ describe("CartPage", () => {
     ]);
 
     const button = await screen.findByText(/make payment/i);
-    await act(async () => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(mockSetCart).not.toHaveBeenCalledWith([]);
@@ -377,9 +366,7 @@ describe("CartPage", () => {
 
     const button = await screen.findByText(/Make Payment/i);
 
-    await act(async () => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -500,9 +487,7 @@ describe("CartPage", () => {
 
     const button = await screen.findByText(/Make Payment/i);
 
-    await act(async () => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(button).toBeDisabled();
