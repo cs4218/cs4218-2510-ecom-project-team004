@@ -45,18 +45,21 @@ const mockProducts = [
 
 const renderWithRouter = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
-describe("Products Page (Admin) - unit tests", () => {
+describe("Products", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test("fetches and displays products", async () => {
+    // Arange
     axios.get.mockResolvedValueOnce({ data: { products: mockProducts } });
 
+    // Act
     renderWithRouter(<Products />);
 
     await screen.findByText("Product A");
 
+    // Assert
     expect(screen.getByText("Product A")).toBeInTheDocument();
     expect(screen.getByText("Description A")).toBeInTheDocument();
     expect(screen.getByText("Product B")).toBeInTheDocument();
@@ -72,23 +75,42 @@ describe("Products Page (Admin) - unit tests", () => {
   });
 
   test("shows toast on API failure", async () => {
+    // Arrange
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
+    // Act
     renderWithRouter(<Products />);
 
+    // Assert
     await waitFor(() =>
-      expect(toastModule.error).toHaveBeenCalledWith("Someething Went Wrong")
+      expect(toastModule.error).toHaveBeenCalledWith("Failed to fetch products")
     );
   });
 
   test("renders nothing when product list empty", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     renderWithRouter(<Products />);
 
+    // Assert
     await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
 
     expect(screen.queryByText("Product A")).toBeNull();
     expect(screen.queryByAltText("Product A")).toBeNull();
+  });
+
+  test("handles missing products key in response gracefully", async () => {
+    // Arrange
+    axios.get.mockResolvedValueOnce({ data: {} }); // products key missing
+
+    // Act
+    renderWithRouter(<Products />);
+
+    // Assert
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText("Product A")).toBeNull();
+    expect(toastModule.error).not.toHaveBeenCalled();
   });
 });
