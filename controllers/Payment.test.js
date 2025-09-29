@@ -47,7 +47,7 @@ describe("Payment Controllers", () => {
   });
 
   // Braintree Token Controller Tests
-  it("should return token when clientToken.generate succeeds", async () => {
+  test("should return token when clientToken.generate succeeds", async () => {
     // Arrange
     const fakeToken = { clientToken: "abc123" };
     braintree.__mockGenerate.mockImplementation((_, cb) => cb(null, fakeToken));
@@ -64,7 +64,7 @@ describe("Payment Controllers", () => {
     expect(mockRes.status).not.toHaveBeenCalledWith(500);
   });
 
-  it("should return 500 when clientToken.generate fails", async () => {
+  test("should return 500 when clientToken.generate fails", async () => {
     // Arrange
     const fakeError = new Error("Failed to generate token");
     braintree.__mockGenerate.mockImplementation((_, cb) => cb(fakeError, null));
@@ -79,7 +79,7 @@ describe("Payment Controllers", () => {
     });
   });
 
-  it("should hit catch block when unexpected error occurs in token controller", async () => {
+  test("should hit catch block when unexpected error occurs in token controller", async () => {
     // Arrange
     braintree.__mockGenerate.mockImplementation((_, cb) =>
       cb(new Error("Unexpected payment error"), null)
@@ -100,7 +100,7 @@ describe("Payment Controllers", () => {
   });
 
   // BrainTree Payment Controller Tests
-  it("should return 400 if cart is empty", async () => {
+  test("should return 400 if cart is empty", async () => {
     // Arrange
     mockReq.body = { nonce: "test-nonce", cart: [] };
 
@@ -114,7 +114,7 @@ describe("Payment Controllers", () => {
     });
   });
 
-  it("should return 400 if nonce is missing", async () => {
+  test("should return 400 if nonce is missing", async () => {
     // Arrange
     mockReq.body = { cart: [{ price: 50 }] };
 
@@ -128,7 +128,7 @@ describe("Payment Controllers", () => {
     });
   });
 
-  it("should return 400 if any price is negative or invalid", async () => {
+  test("should return 400 if any price is negative or invalid", async () => {
     // Arrange
     const testCases = [
       {
@@ -153,7 +153,7 @@ describe("Payment Controllers", () => {
     }
   });
 
-  it("should process payment successfully and save order", async () => {
+  test("should process payment successfully and save order", async () => {
     // Arrange
     mockReq.body = {
       nonce: "test-nonce",
@@ -182,7 +182,7 @@ describe("Payment Controllers", () => {
     expect(mockRes.json).toHaveBeenCalledWith({ ok: true });
   });
 
-  it("should return 500 when transaction fails", async () => {
+  test("should return 500 when transaction fails", async () => {
     // Arrange
     mockReq.body = { nonce: "test-nonce", cart: [{ price: 50 }] };
     const fakeError = new Error("Payment failed");
@@ -196,7 +196,7 @@ describe("Payment Controllers", () => {
     expect(mockRes.send).toHaveBeenCalledWith({ error: "Payment failed" });
   });
 
-  it("should return 500 when transaction result.success is false", async () => {
+  test("should return 500 when transaction result.success is false", async () => {
     // Arrange
     mockReq.body = { nonce: "test-nonce", cart: [{ price: 50 }] };
     const fakeResult = { success: false, message: "Card declined" };
@@ -213,7 +213,7 @@ describe("Payment Controllers", () => {
     });
   });
 
-  it("should return 500 if saving order fails", async () => {
+  test("should return 500 if saving order fails", async () => {
     // Arrange
     mockReq.body = { nonce: "test-nonce", cart: [{ price: 50 }] };
     const fakeResult = { success: true, transaction: { id: "txn123" } };
@@ -241,7 +241,7 @@ describe("Payment Controllers", () => {
     });
   });
 
-  it("should return 500 if unexpected error occurs", async () => {
+  test("should return 500 if unexpected error occurs", async () => {
     // Arrange
     mockReq.body = { nonce: "test-nonce", cart: [{ price: 50 }] };
     braintree.__mockSale.mockImplementation(() => {
@@ -262,7 +262,7 @@ describe("Payment Controllers", () => {
     });
   });
 
-  it("should correctly handle floating point prices", async () => {
+  test("should correctly handle floating point prices", async () => {
     // Arrange
     mockReq.body = {
       nonce: "test-nonce",
@@ -279,7 +279,7 @@ describe("Payment Controllers", () => {
     expect(passedAmount).toBe("1014.98");
   });
 
-  it("should handle boundary values for price", async () => {
+  test("should handle boundary values for price", async () => {
     // Arrange
     const boundaryPrices = [0, 0.01, 9999999.99];
     for (const price of boundaryPrices) {
