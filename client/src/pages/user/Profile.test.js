@@ -147,4 +147,22 @@ describe("Profile page", () => {
 
         expect(toast.success).toHaveBeenCalledWith("Profile Updated Successfully");
     })
+
+    it("Should report an error when an error is encountered in submitting the form", async () => {
+        axios.put.mockImplementation(() => { throw new Error(); })
+
+        useAuth.mockReturnValue([{ user: mockUser }, jest.fn()]);
+
+        const { getByText } = render(
+            <MemoryRouter>
+                <Profile/>
+            </MemoryRouter>
+        );
+
+        fireEvent.click(getByText("UPDATE"));
+
+        await waitFor(() => expect(axios.put).toHaveBeenCalled());
+
+        expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    })
 })
