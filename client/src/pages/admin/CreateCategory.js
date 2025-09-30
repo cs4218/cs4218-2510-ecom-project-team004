@@ -6,6 +6,9 @@ import axios from "axios";
 import CategoryForm from "../../components/Form/CategoryForm";
 import { Modal } from "antd";
 
+// TODO: Fix updating with an empty string
+// TODO: Test cancel function (probably not necessary)
+
 const CreateCategory = () => {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
@@ -37,8 +40,6 @@ const CreateCategory = () => {
       const { data } = await axios.get("/api/v1/category/get-category");
       if (data?.success) {
         setCategories(data?.category);
-      } else {
-        toast.error("Something went wrong in getting category");
       }
     } catch (error) {
       toast.error("Something went wrong in getting category");

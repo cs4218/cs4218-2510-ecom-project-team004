@@ -142,19 +142,6 @@ describe("CreateCategory Component", () => {
     await waitFor(() => expect(axios.delete).toHaveBeenCalledWith("/api/v1/category/delete-category/1"));
   });
 
-  it("displays error message if fetching categories fails but api resolves", async () => {
-    axios.get.mockResolvedValueOnce({ data: { success: false, category: [] } });
-
-    render(
-      <MemoryRouter>
-        <CreateCategory />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => expect(axios.get).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
-  });
-
   it("displays error message if fetching categories fails and api fails", async () => {
     axios.get.mockRejectedValueOnce(new Error("Request failed with status code 400"))
 
