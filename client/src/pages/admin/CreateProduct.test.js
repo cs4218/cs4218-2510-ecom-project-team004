@@ -1,14 +1,11 @@
 import CreateProduct from "./CreateProduct";
 import '@testing-library/jest-dom/extend-expect';
 import { render, within, fireEvent, waitFor } from "@testing-library/react";
-import userEvent from '@testing-library/user-event';
 import axios from "axios";
 import React from "react";
 import toast from 'react-hot-toast';
 import { MemoryRouter, useNavigate } from "react-router-dom";
-import { Select } from "antd";
 import { act } from "react-dom/test-utils";
-import { GiTargetArrows } from "react-icons/gi";
 
 const mockNavigate = jest.fn();
 
