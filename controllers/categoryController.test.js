@@ -1,5 +1,5 @@
 /**
- * Tests for createCategoryController, updateCategoryController, deleteCategoryController
+ * Tests for createCategoryController, updateCategoryController, deleteCategoryCOntroller
  * Works with ESM paths (notice the .js at import paths).
  */
 
@@ -39,7 +39,7 @@ import categoryModel from '../models/categoryModel.js';
 import {
   createCategoryController,
   updateCategoryController,
-  deleteCategoryController, // note the capital O in your source
+  deleteCategoryCOntroller, // note the capital O in your source
 } from './categoryController.js';
 
 // ---- tiny req/res helpers ----
@@ -174,14 +174,14 @@ describe('updateCategoryController', () => {
 });
 
 /* ------------------ DELETE ------------------ */
-describe('deleteCategoryController', () => {
+describe('deleteCategoryCOntroller', () => {
   it('200 on successful delete', async () => {
     categoryModel.findByIdAndDelete.mockResolvedValueOnce({ acknowledged: true });
 
     const req = mockReq({ params: { id: 'cid' } });
     const res = mockRes();
 
-    await deleteCategoryController(req, res);
+    await deleteCategoryCOntroller(req, res);
 
     expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith('cid');
     expect(res.status).toHaveBeenCalledWith(200);
@@ -198,7 +198,7 @@ describe('deleteCategoryController', () => {
     const req = mockReq({ params: { id: 'cid' } });
     const res = mockRes();
 
-    await deleteCategoryController(req, res);
+    await deleteCategoryCOntroller(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith(
