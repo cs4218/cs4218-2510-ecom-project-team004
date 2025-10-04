@@ -83,8 +83,11 @@ function submitForm() {
 
 
 describe('Register Component', () => {
+  let logSpy;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});  
   });
 
   it('should call registration API', async () => {
@@ -127,11 +130,12 @@ describe('Register Component', () => {
   });
 
   it('should display error message on promise rejection', async () => {
-    axios.post.mockRejectedValueOnce();
+    axios.post.mockRejectedValueOnce('Error from register API');
 
     submitForm();
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(logSpy).toHaveBeenCalledWith('Error from register API');
     expect(toast.error).toHaveBeenCalledWith('Something went wrong');
   });
 });
