@@ -281,7 +281,7 @@ export const searchProductController = async (req, res) => {
 };
 
 // similar products
-export const realtedProductController = async (req, res) => {
+export const realtedProductController = async (req, res) => {  // TYPO CAUSING BUG???
   try {
     const { pid, cid } = req.params;
     const products = await productModel
@@ -342,36 +342,164 @@ export const braintreeTokenController = async (req, res) => {
   }
 };
 
-//payment
+// //payment
+// export const brainTreePaymentController = async (req, res) => {
+//   try {
+//     const { nonce, cart } = req.body;
+//     let total = 0;
+//     cart.map((i) => {
+//       total += i.price;
+//     });
+//     let newTransaction = gateway.transaction.sale(
+//       {
+//         amount: total,
+//         paymentMethodNonce: nonce,
+//         options: {
+//           submitForSettlement: true,
+//         },
+//       },
+//       function (error, result) {
+//         if (result) {
+//           const order = new orderModel({
+//             products: cart,
+//             payment: result,
+//             buyer: req.user._id,
+//           }).save();
+//           res.json({ ok: true });
+//         } else {
+//           res.status(500).send(error);
+//         }
+//       }
+//     );
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+// FIXED: The above code had floating point precision issues and total amount should be a string for braintree
+// NOTE: The code below was written with the help of an LLM
+// payment 
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
-    let total = 0;
-    cart.map((i) => {
-      total += i.price;
-    });
-    let newTransaction = gateway.transaction.sale(
+
+    // STEP 1: Calculate the total in cents to avoid floating-point errors.
+    // We multiply each price by 100 and use Math.round() for safety,
+    // then sum the integer values.
+    const totalInCents = cart.reduce((sum, item) => {
+      // Ensure the price is a number and convert to cents
+      const priceInCents = Math.round(Number(item.price) * 100);
+      return sum + priceInCents;
+    }, 0);
+
+    // STEP 2: Convert the total back to a fixed-point string for Braintree API.
+    // The Braintree API expects the amount as a string with 2 decimal places.
+    const totalAmount = (totalInCents / 100).toFixed(2);
+
+    gateway.transaction.sale(
       {
-        amount: total,
+        amount: totalAmount, // Pass the formatted string to Braintree
         paymentMethodNonce: nonce,
         options: {
           submitForSettlement: true,
         },
       },
       function (error, result) {
-        if (result) {
+        if (error) {
+          // This path handles network or communication errors with Braintree.
+          return res.status(500).send(error);
+        }
+
+        // STEP 3: Handle the Braintree result correctly.
+        // Check for result and result.success to handle both success and failure outcomes.
+        if (result && result.success) {
           const order = new orderModel({
             products: cart,
             payment: result,
             buyer: req.user._id,
-          }).save();
+          });
+          order.save();
           res.json({ ok: true });
         } else {
-          res.status(500).send(error);
+          // This path handles a declined transaction (e.g., insufficient funds).
+          console.error("Braintree Transaction Failed:", result.message);
+          return res.status(500).send({ error: result.message });
         }
       }
     );
   } catch (error) {
     console.log(error);
+    // res.status(500).send({ error: "Something went wrong" }); // Is this needed, or more of a design choice?
   }
 };
+
+/*
+Summary of what each function in productController.js does
+NOTE: The following summary was written with the help of an LLM
+
+🛍️ Product Controllers
+📦 createProductController
+- Validates required fields and photo size.
+- Creates a new product document with a slug.
+- Reads photo file and stores binary data.
+- Saves product to MongoDB.
+📋 getProductController
+- Fetches up to 12 products.
+- Populates category info.
+- Excludes photo data for performance.
+- Sorts by newest.
+🔍 getSingleProductController
+- Fetches one product by slug.
+- Populates category.
+- Excludes photo.
+🖼️ productPhotoController
+- Retrieves photo binary data by product ID.
+- Sets correct content type and sends image.
+🗑️ deleteProductController
+- Deletes product by ID.
+- Excludes photo from query.
+✏️ updateProductController
+- Validates input.
+- Updates product fields and slug.
+- Handles optional photo update.
+- Saves changes.
+
+🧪 Filtering & Searching
+🧮 productFiltersController
+- Filters products by:
+- Category (checked)
+- Price range (radio)
+- Returns matching products.
+🔢 productCountController
+- Returns total number of products using estimatedDocumentCount().
+📄 productListController
+- Implements pagination:
+- 6 products per page.
+- Skips and limits based on page number.
+- Sorted by creation date.
+🔎 searchProductController
+- Searches products by keyword in:
+- name
+- description
+- Uses case-insensitive regex.
+🧩 realtedProductController
+- Fetches up to 3 products in the same category.
+- Excludes the current product (_id: { $ne: pid }).
+🗂️ productCategoryController
+- Finds category by slug.
+- Returns all products in that category.
+
+💰 Payment Controllers
+🔐 braintreeTokenController
+- Generates a client token for Braintree.
+- Used on frontend to initialize payment UI.
+💳 brainTreePaymentController
+- Accepts:
+- nonce: payment method token from frontend.
+- cart: array of products.
+- Calculates total price.
+- Initiates transaction with Braintree.
+- On success:
+- Saves order to DB.
+- Returns confirmation.
+*/
