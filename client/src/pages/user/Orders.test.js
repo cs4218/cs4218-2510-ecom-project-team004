@@ -4,6 +4,7 @@ import { render, waitFor } from "@testing-library/react";
 import Orders from "./Orders";
 import { MemoryRouter } from "react-router-dom";
 import moment from "moment";
+import { useAuth } from "../../context/auth";
 
 jest.mock("axios");
 jest.mock("../../context/auth", () => ({
@@ -131,6 +132,25 @@ describe("Orders component", () => {
         axios.get.mockImplementation(() => {
             throw new Error();
         });
+
+        const { getByText } = render(
+            <MemoryRouter>
+                <Orders/>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            // Wait for the "all orders" text to be rendered.
+            expect(getByText("All Orders")).toBeInTheDocument();
+        });
+
+        // There should be no children of the parent of this element.
+        const all_orders_parent = getByText("All Orders").parentNode;
+        expect(all_orders_parent.children).toHaveLength(1);
+    })
+
+    it("should not render orders if there is no authentication token", async () => {
+        useAuth.mockReturnValue([{ token: "" }, jest.fn()])
 
         const { getByText } = render(
             <MemoryRouter>
