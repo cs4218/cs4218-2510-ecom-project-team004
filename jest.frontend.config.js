@@ -31,6 +31,7 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: [
     "client/src/components/Footer.js",
+    "client/src/components/Spinner.js",
     "client/src/pages/admin/Users.js",
     "client/src/pages/Auth/**",
     "client/src/pages/About.js",
