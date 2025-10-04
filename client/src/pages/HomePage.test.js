@@ -2188,6 +2188,105 @@ describe('HomePage Component - Unit Tests', () => {
         });
     });
 
+    describe('Price Handling', () => {
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with missing price', async () => {
+            const productWithNoPrice = [{
+                _id: 'price-test-1',
+                name: 'Mystery Product',
+                description: 'Product without price',
+                price: undefined,
+                slug: 'mystery-product'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productWithNoPrice } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Mystery Product')).toBeInTheDocument();
+            });
+
+            // Price undefined should render as $0.00
+            expect(screen.getByText('$0.00')).toBeInTheDocument();
+        });
+
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with null price', async () => {
+            const productWithNullPrice = [{
+                _id: 'price-test-2',
+                name: 'Null Price Product',
+                description: 'Product with null price',
+                price: null,
+                slug: 'null-price-product'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productWithNullPrice } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Null Price Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText('$0.00')).toBeInTheDocument();
+        });
+
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with price of 0', async () => {
+            const productWithZeroPrice = [{
+                _id: 'price-test-3',
+                name: 'Free Product',
+                description: 'Product that is free',
+                price: 0,
+                slug: 'free-product'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productWithZeroPrice } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Free Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText('$0.00')).toBeInTheDocument();
+        });
+    });
+
     describe('Edge Cases', () => {
         // NOTE: The test below was written with the help of an LLM
         test('handles empty categories response', async () => {
