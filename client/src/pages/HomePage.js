@@ -36,6 +36,7 @@ const HomePage = () => {
     getAllCategory();
     getTotal();
   }, []);
+
   //get products
   const getAllProducts = async () => {
     try {
@@ -63,6 +64,7 @@ const HomePage = () => {
     if (page === 1) return;
     loadMore();
   }, [page]);
+
   //load more
   const loadMore = async () => {
     try {
@@ -86,15 +88,44 @@ const HomePage = () => {
     }
     setChecked(all);
   };
-  useEffect(() => {
-    if (!checked.length || !radio.length) getAllProducts();
-  }, [checked.length, radio.length]);
 
+  // FIXED: || --> && --- Don't think this is needed? The other useEffect() should handle
+  // useEffect(() => { 
+  //   if (!checked.length && !radio.length) getAllProducts(); 
+  // }, [checked.length, radio.length]);
+
+  // FIXED: Added else statement to reset products and total when no filters are applied
+  // useEffect(() => {
+  //   if (checked.length || radio.length) filterProduct();
+  // }, [checked, radio]);
   useEffect(() => {
-    if (checked.length || radio.length) filterProduct();
+    if (checked.length || radio.length) {
+      // Filters applied, reset page and fetch filtered products
+      setPage(1);
+      filterProduct();
+    } else {
+      // No filters, reset to full product list and total
+      setPage(1);
+      getAllProducts();
+      getTotal();
+    }
   }, [checked, radio]);
 
+  // FIXED: Added setTotal to filtered count
+
   //get filterd product
+  // const filterProduct = async () => {
+  //   try {
+  //     const { data } = await axios.post("/api/v1/product/product-filters", {
+  //       checked,
+  //       radio,
+  //     });
+  //     setProducts(data?.products);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
   const filterProduct = async () => {
     try {
       const { data } = await axios.post("/api/v1/product/product-filters", {
@@ -102,10 +133,12 @@ const HomePage = () => {
         radio,
       });
       setProducts(data?.products);
+      setTotal(data?.products.length); // update total to filtered count
     } catch (error) {
       console.log(error);
     }
   };
+
   return (
     <Layout title={"ALL Products - Best offers "}>
       {/* banner image */}
@@ -140,6 +173,7 @@ const HomePage = () => {
               ))}
             </Radio.Group>
           </div>
+          {/* THOUGHT: Is handling the Reset Filters button through reloading the page a bug? I think it's a design choice? The functionality is there but just a bit slow... */}
           <div className="d-flex flex-column">
             <button
               className="btn btn-danger"
@@ -206,6 +240,7 @@ const HomePage = () => {
                   setPage(page + 1);
                 }}
               >
+                {/* FIXED: Ran the command "npm install -prefix ./client react-icons@^5.0.1" */}
                 {loading ? (
                   "Loading ..."
                 ) : (
@@ -224,3 +259,5 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+// THOUGHT: Is selecting a filter with no items and showing nothing a bug? I think it's a design choice? The functionality is there but just a bit confusing...
