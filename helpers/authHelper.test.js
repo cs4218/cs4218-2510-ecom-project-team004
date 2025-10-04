@@ -23,8 +23,9 @@ describe('Hash Password', () => {
         expect(hashedPassword).toBe('fakeHashedPassword');  // should return hashed password
     });
 
+    // console.log mock is written with the help of AI
     it('should show error in console log', async () => {
-        const logSpy = jest.spyOn(global.console, 'log');
+        const logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});
         const password = 'fakePassword';
         bcrypt.hash.mockRejectedValue('Error when hashing password');
 
