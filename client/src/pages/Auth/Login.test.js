@@ -73,7 +73,7 @@ function submitForm() {
   fireEvent.click(getByText('LOGIN'));
 }
 describe('Login Component', () => {
-  describe.skip('Login Form', () => {
+  describe('Login Form', () => {
       beforeEach(() => {
           jest.clearAllMocks();
       });
@@ -121,7 +121,7 @@ describe('Login Component', () => {
       });
   });
   
-  describe.skip('Forgot Password', () => {
+  describe('Forgot Password', () => {
       beforeEach(() => {
           jest.clearAllMocks();
       });
