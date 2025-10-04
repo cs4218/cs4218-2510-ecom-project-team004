@@ -204,7 +204,13 @@ const HomePage = () => {
                     </h5>
                   </div>
                   <p className="card-text ">
-                    {p.description.substring(0, 60)}...
+                    {/* FIXED: Added checks for description */}
+                    {p.description
+                      ? p.description.length > 60
+                        ? `${p.description.substring(0, 60)}...`   // Show "..." only if cut text
+                        : p.description                            // Show full text if it's short
+                      : "No description."                          // Show message if missing
+                    }
                   </p>
                   <div className="card-name-price">
                     <button
