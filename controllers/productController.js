@@ -180,7 +180,7 @@ export const updateProductController = async (req, res) => {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+    //validation
     switch (true) {
       case !name:
         return res.status(500).send({ error: "Name is Required" });
@@ -237,7 +237,7 @@ export const productFiltersController = async (req, res) => {
 
     // FIXED: Added radio validation
     // NOTE: Had help from an LLM
-    if (Array.isArray(checked) && radio.length >= 2) {
+    if (Array.isArray(radio) && radio.length >= 2) {
       const [minPrice, maxPrice] = radio;
       if (
         typeof minPrice === 'number' &&
