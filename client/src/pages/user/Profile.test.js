@@ -165,4 +165,22 @@ describe("Profile page", () => {
 
         expect(toast.error).toHaveBeenCalledWith("Something went wrong");
     })
+
+    it("Should report an error when there is an error in the data", async () => {
+        axios.put.mockResolvedValue({ data: { error: "ERROR" } });
+
+        useAuth.mockReturnValue([{ user: mockUser }, jest.fn()]);
+
+        const { getByText } = render(
+            <MemoryRouter>
+                <Profile/>
+            </MemoryRouter>
+        );
+
+        fireEvent.click(getByText("UPDATE"));
+
+        await waitFor(() => expect(axios.put).toHaveBeenCalled());
+
+        expect(toast.error).toHaveBeenCalledWith("ERROR");
+    })
 })
