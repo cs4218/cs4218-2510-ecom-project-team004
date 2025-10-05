@@ -16,13 +16,11 @@ const Profile = () => {
 
   //get user data
   useEffect(() => {
-    if (auth?.user){
-          const { email, name, phone, address } = auth?.user;
-          setName(name);
-          setPhone(phone);
-          setEmail(email);
-          setAddress(address);
-      }
+    const { email, name, phone, address } = auth?.user;
+    setName(name);
+    setPhone(phone);
+    setEmail(email);
+    setAddress(address);
   }, [auth?.user]);
 
   // form function
@@ -36,7 +34,7 @@ const Profile = () => {
         phone,
         address,
       });
-      if (data?.error) {
+      if (data?.errro) {
         toast.error(data?.error);
       } else {
         setAuth({ ...auth, user: data?.updatedUser });
@@ -68,7 +66,7 @@ const Profile = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="form-control"
-                    id="exampleInputName1"
+                    id="exampleInputEmail1"
                     placeholder="Enter Your Name"
                     autoFocus
                   />
@@ -80,7 +78,7 @@ const Profile = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
                     id="exampleInputEmail1"
-                    placeholder="Enter Your Email"
+                    placeholder="Enter Your Email "
                     disabled
                   />
                 </div>
@@ -100,7 +98,7 @@ const Profile = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="form-control"
-                    id="exampleInputPhone1"
+                    id="exampleInputEmail1"
                     placeholder="Enter Your Phone"
                   />
                 </div>
@@ -110,7 +108,7 @@ const Profile = () => {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="form-control"
-                    id="exampleInputAddress1"
+                    id="exampleInputEmail1"
                     placeholder="Enter Your Address"
                   />
                 </div>

@@ -3,15 +3,12 @@ import Layout from "./../components/Layout";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/ProductDetailsStyles.css";
-import toast from "react-hot-toast";  // ADDED
-import { useCart } from "../context/cart";  // ADDED
 
 const ProductDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [cart, setCart] = useCart(); // ADDED
 
   //initalp details
   useEffect(() => {
@@ -58,28 +55,14 @@ const ProductDetails = () => {
           <h6>Name : {product.name}</h6>
           <h6>Description : {product.description}</h6>
           <h6>
-            {/* FIXED: Added check for missing price */}
-            Price : {(product?.price ?? 0)?.toLocaleString("en-US", {
+            Price :
+            {product?.price?.toLocaleString("en-US", {
               style: "currency",
               currency: "USD",
             })}
           </h6>
           <h6>Category : {product?.category?.name}</h6>
-          {/*FIXED: class --> className*/}
-          {/* Fixed: Handle button click */}
-          <button
-            className="btn btn-secondary ms-1"
-            onClick={() => {
-              setCart([...cart, product]);
-              localStorage.setItem(
-                "cart",
-                JSON.stringify([...cart, product])
-              );
-              toast.success("Item Added to cart");
-            }}
-          >
-            ADD TO CART
-          </button>
+          <button class="btn btn-secondary ms-1">ADD TO CART</button>
         </div>
       </div>
       <hr />
@@ -100,21 +83,14 @@ const ProductDetails = () => {
                 <div className="card-name-price">
                   <h5 className="card-title">{p.name}</h5>
                   <h5 className="card-title card-price">
-                    {/* FIXED: Added check for missing price */}
-                    {(p.price ?? 0).toLocaleString("en-US", {
+                    {p.price.toLocaleString("en-US", {
                       style: "currency",
                       currency: "USD",
                     })}
                   </h5>
                 </div>
                 <p className="card-text ">
-                  {/* FIXED: Added checks for description */}
-                  {p.description
-                    ? p.description.length > 60
-                      ? `${p.description.substring(0, 60)}...`   // Show "..." only if cut text
-                      : p.description                            // Show full text if it's short
-                    : "No description."                          // Show message if missing
-                  }
+                  {p.description.substring(0, 60)}...
                 </p>
                 <div className="card-name-price">
                   <button
@@ -123,19 +99,19 @@ const ProductDetails = () => {
                   >
                     More Details
                   </button>
-                  <button
-                    className="btn btn-dark ms-1"
-                    onClick={() => {
-                      setCart([...cart, p]);
-                      localStorage.setItem(
-                        "cart",
-                        JSON.stringify([...cart, p])
-                      );
-                      toast.success("Item Added to cart");
-                    }}
-                  >
-                    ADD TO CART
-                  </button> {/* FIXED: Uncommented the ADD TO CART button*/}
+                  {/* <button
+                  className="btn btn-dark ms-1"
+                  onClick={() => {
+                    setCart([...cart, p]);
+                    localStorage.setItem(
+                      "cart",
+                      JSON.stringify([...cart, p])
+                    );
+                    toast.success("Item Added to cart");
+                  }}
+                >
+                  ADD TO CART
+                </button> */}
                 </div>
               </div>
             </div>

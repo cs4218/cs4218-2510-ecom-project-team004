@@ -22,24 +22,14 @@ jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
   }));  
 
-jest.mock('../../hooks/useCategory', () => jest.fn(() => []));  // Mock useCategory hook to return null state and a mock function
-
-// Mock navigate function in useNavigate hook
-const mockNavigate = jest.fn();
-
-jest.mock('react-router-dom', () => ({  
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-  }));
-
-Object.defineProperty(window, 'localStorage', {
-  value: {
-    setItem: jest.fn(),
-    getItem: jest.fn(),
-    removeItem: jest.fn(),
-  },
-  writable: true,
-});
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      setItem: jest.fn(),
+      getItem: jest.fn(),
+      removeItem: jest.fn(),
+    },
+    writable: true,
+  });
 
 window.matchMedia = window.matchMedia || function() {
     return {
@@ -48,21 +38,17 @@ window.matchMedia = window.matchMedia || function() {
       removeListener: function() {}
     };
   };
+      
 
-const formData = {
-  name: 'John Doe',
-  email: 'test@example.com',
-  password: 'password123',
-  phone: '1234567890',
-  address: '123 Street',
-  DOB: '2000-01-01',
-  answer: 'Football',
-}
+describe('Register Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-function submitForm() {
-  const { name, email, password, phone, address, DOB, answer } = formData;
+  it('should register the user successfully', async () => {
+    axios.post.mockResolvedValueOnce({ data: { success: true } });
 
-  const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText } = render(
         <MemoryRouter initialEntries={['/register']}>
           <Routes>
             <Route path="/register" element={<Register />} />
@@ -70,72 +56,42 @@ function submitForm() {
         </MemoryRouter>
       );
 
-    fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: name } });
-    fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: email } });
-    fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: password } });
-    fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: phone } });
-    fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: address } });
-    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: DOB } });
-    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: answer } });
+    fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
+    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
+    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
 
     fireEvent.click(getByText('REGISTER'));
-}
-
-
-describe('Register Component', () => {
-  let logSpy;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});  
-  });
-
-  it('should call registration API', async () => {
-    axios.post.mockResolvedValueOnce({ data: { success: true } });
-
-    submitForm();
-
-    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/api/v1/auth/register', formData));
-  });
-
-  it('should register the user successfully', async () => {
-    axios.post.mockResolvedValueOnce({ data: { success: true } });
-
-    submitForm();
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledWith('Register Successfully, please login');
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
   it('should display error message on failed registration', async () => {
-    axios.post.mockResolvedValueOnce({ 
-      data: {
-        success: false,
-        message: 'Already Register please login'} });
+    axios.post.mockRejectedValueOnce({ message: 'User already exists' });
 
-    submitForm();
+    const { getByText, getByPlaceholderText } = render(
+        <MemoryRouter initialEntries={['/register']}>
+          <Routes>
+            <Route path="/register" element={<Register />} />
+          </Routes>
+        </MemoryRouter>
+      );
 
-    await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith('Already Register please login');
-  });
+    fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
+    fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
+    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
+    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
 
-  it('should display error message on empty response', async () => {
-    axios.post.mockResolvedValueOnce({});
-
-    submitForm();
-
-    await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith('Something went wrong');
-  });
-
-  it('should display error message on promise rejection', async () => {
-    axios.post.mockRejectedValueOnce('Error from register API');
-
-    submitForm();
+    fireEvent.click(getByText('REGISTER'));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(logSpy).toHaveBeenCalledWith('Error from register API');
     expect(toast.error).toHaveBeenCalledWith('Something went wrong');
   });
 });

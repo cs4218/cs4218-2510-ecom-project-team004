@@ -25,7 +25,7 @@ export const Prices = [
       array: [80, 99],
     },
     {
-      _id: 4, // This should be 5? Maybe cannot detect this bug at Unit Test stage? Or my unit tests are written well...
+      _id: 4,
       name: "$100 or more",
       array: [100, 9999],
     },

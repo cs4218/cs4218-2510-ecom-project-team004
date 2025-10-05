@@ -7,22 +7,21 @@ import { Link } from "react-router-dom";
 const Products = () => {
   const [products, setProducts] = useState([]);
 
-  // Get all products
+  //getall products
   const getAllProducts = async () => {
     try {
       const { data } = await axios.get("/api/v1/product/get-product");
-      setProducts(data?.products || []);
+      setProducts(data.products);
     } catch (error) {
       console.log(error);
-      toast.error("Failed to fetch products");
+      toast.error("Someething Went Wrong");
     }
   };
 
-  // Load all products when component mounts
+  //lifecycle method
   useEffect(() => {
     getAllProducts();
   }, []);
-
   return (
     <Layout>
       <div className="row">

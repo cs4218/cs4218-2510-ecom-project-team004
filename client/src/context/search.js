@@ -1,38 +1,20 @@
-import React, { useState, useContext, createContext } from "react"; // FIXED: Added import for "React"
+import { useState, useContext, createContext } from "react";
 
 const SearchContext = createContext();
 const SearchProvider = ({ children }) => {
-  const [searchState, setSearchState] = useState({ // Should be searching related state and setter?
+  const [auth, setAuth] = useState({
     keyword: "",
     results: [],
   });
-  
-  // FIXED: Changed how state is updated to merge instead of replace
-  // NOTE: This logic was written with the help of an LLM
-  // Wrapper function that merges updates instead of replacing
-  const updateSearchState = (updates) => {
-    setSearchState(prevState => ({
-      ...prevState,
-      ...updates
-    }));
-  };
 
   return (
-    <SearchContext.Provider value={[searchState, updateSearchState]}>
+    <SearchContext.Provider value={[auth, setAuth]}>
       {children}
     </SearchContext.Provider>
   );
 };
 
 // custom hook
-// const useSearch = () => useContext(SearchContext);
-// FIXED: Added error handling
-const useSearch = () => {
-  const context = useContext(SearchContext);
-  if (context === undefined) {
-    throw new Error('useSearch must be used within a SearchProvider');
-  }
-  return context;
-};
+const useSearch = () => useContext(SearchContext);
 
 export { useSearch, SearchProvider };
