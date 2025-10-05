@@ -5,7 +5,6 @@ export default {
   // when testing backend
   testEnvironment: "node",
 
-  // which test to run
   testMatch: [
     "<rootDir>/config/*.test.js",
     "<rootDir>/controllers/*.test.js",
