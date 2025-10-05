@@ -5,7 +5,16 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { comparePassword, hashPassword } from "../helpers/authHelper";
 import JWT, { sign } from "jsonwebtoken";
 
-jest.mock("../models/userModel");
+jest.mock('../models/userModel', () => {
+  const mockUserModel = jest.fn().mockImplementation((userInfo) => ({
+    save: mockSave
+  }));
+  mockUserModel.findById = jest.fn();
+  mockUserModel.findOne = jest.fn();
+  mockUserModel.findByIdAndUpdate = jest.fn();
+  return mockUserModel;
+});
+
 jest.mock("../models/orderModel");
 jest.mock("jsonwebtoken");
 
@@ -25,17 +34,13 @@ describe("Update Profile Controller", () => {
         }
     }
 
-    let mockRes = {}
-
-    beforeEach(() => {
-        mockRes = {
-            send: jest.fn(),
-            status: jest.fn(() => mockRes) // To allow chaining.
-        }
-    })
+    const mockRes = {
+        send: jest.fn(),
+        status: jest.fn(() => mockRes) // To allow chaining.
+    }
 
     afterEach(() => {
-        jest.resetAllMocks();
+        jest.clearAllMocks();
     })
 
     it("Should return an error if password is 5 characters", async () => {
@@ -116,7 +121,11 @@ describe("Get Orders Controller", () => {
         }
     }
 
-    let mockRes = {}
+    const mockRes = {
+        json: jest.fn(),
+        status: jest.fn(() => mockRes),
+        send: jest.fn()
+    }
 
     const mockOrders = [ ]
 
@@ -128,16 +137,10 @@ describe("Get Orders Controller", () => {
                 }))
             })),
         }
-
-        mockRes = {
-            json: jest.fn(),
-            status: jest.fn(() => mockRes),
-            send: jest.fn()
-        }
     })
 
     afterEach(() => {
-        jest.resetAllMocks();
+        jest.clearAllMocks();
     })
 
     it("Should return the user's orders", async () => {
@@ -164,7 +167,11 @@ describe("Get All Orders Controller", () => {
     let mockOrderModel = { }
     const mockReq = {}
 
-    let mockRes = {}
+    const mockRes = {
+        json: jest.fn(),
+        status: jest.fn(() => mockRes),
+        send: jest.fn()
+    }
 
     const mockOrders = [ ]
 
@@ -179,15 +186,10 @@ describe("Get All Orders Controller", () => {
             })),
         }
 
-        mockRes = {
-            json: jest.fn(),
-            status: jest.fn(() => mockRes),
-            send: jest.fn()
-        }
     })
 
     afterEach(() => {
-        jest.resetAllMocks();
+        jest.clearAllMocks();
     })
 
     it("Should return the user's orders", async () => {
@@ -220,18 +222,14 @@ describe("Order Status Controller", () => {
         }
     }
 
-    let mockRes = {}
-
-    beforeEach(() => {
-        mockRes = {
-            json: jest.fn(),
-            status: jest.fn(() => mockRes),
-            send: jest.fn()
-        }
-    })
+    const mockRes = {
+        json: jest.fn(),
+        status: jest.fn(() => mockRes),
+        send: jest.fn()
+    }
 
     afterEach(() => {
-        jest.resetAllMocks();
+        jest.clearAllMocks();
     })
 
     it("Should return the list of orders after status is updated", async () => {
@@ -266,18 +264,11 @@ const userInfo = {
 }
 
 const { res } = getMockRes();
+console.log("RES!");
+console.log(res);
 
 // Mock mongoose methods in userModel
 const mockSave = jest.fn();
-
-jest.mock('../models/userModel', () => {
-  const mockUserModel = jest.fn().mockImplementation((userInfo) => ({
-    save: mockSave
-  }));
-  mockUserModel.findOne = jest.fn();
-  mockUserModel.findByIdAndUpdate = jest.fn();
-  return mockUserModel;
-});
 
 describe('Register Controller', () => {
   beforeEach(() => {
