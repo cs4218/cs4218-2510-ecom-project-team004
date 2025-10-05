@@ -14,12 +14,7 @@ jest.mock('react-hot-toast');
 const mockSetAuth = jest.fn();
 jest.mock('../../context/auth', () => ({
     useAuth: jest.fn(() => [null, mockSetAuth]) // Mock useAuth hook to return null state and a mock function for setAuth
-  }));
 
-  jest.mock('../../context/cart', () => ({
-    useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function
-  }));
-    
 jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
   }));  
@@ -44,13 +39,13 @@ jest.mock('react-router-dom', () => ({
     writable: true,
   });
 
-window.matchMedia = window.matchMedia || function() {
-    return {
-      matches: false,
-      addListener: function() {},
-      removeListener: function() {}
-    };
-  };  
+window.matchMedia = window.matchMedia || function () {
+  return {
+    matches: false,
+    addListener: function () { },
+    removeListener: function () { }
+  };
+};
 
 const formData = {
   email: 'test@example.com',
@@ -208,6 +203,7 @@ describe('Login Component', () => {
       expect(mockNavigate).toHaveBeenCalledTimes(1);
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
+  });
 
     it('should display error message on failed login', async () => {
         axios.post.mockResolvedValueOnce({ 
