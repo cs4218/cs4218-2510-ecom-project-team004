@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import '@testing-library/jest-dom/extend-expect';
-import { render } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
@@ -50,5 +50,32 @@ describe('Private Route', () => {
         );
 
         expect(getByText(/redirecting/i)).toBeInTheDocument();
+    })
+
+    it('should render correctly when auth is OK', async() => {
+        // Mock axios.get to return unauthenticated.
+        const mockAuth = { data: { ok: true } }
+
+        axios.get.mockResolvedValueOnce(mockAuth);
+
+        // Check if Spinner is returned in the document.
+        // We can check if it contains the word "redirecting".
+        const { getByText } = render(
+          <MemoryRouter initialEntries={['/dashboard/private']}>
+            <Routes>
+              <Route path="/dashboard" element={<PrivateRoute />}>
+                  <Route path="private" element={<div>Protected Content</div>} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        );
+
+        // If Outlet is correctly rendered, Protected Content can be found in the document.
+        await waitFor(() => {
+            expect(getByText("Protected Content")).toBeInTheDocument();
+        })
+
+        expect(getByText("Protected Content")).toBeInTheDocument();
+
     })
 })
