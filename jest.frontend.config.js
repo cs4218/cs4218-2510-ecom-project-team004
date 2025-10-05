@@ -43,7 +43,7 @@ export default {
     "client/src/pages/**",
     "client/src/pages/user/**",
     "client/src/context/**",
-    "client/src/hooks",
+    "client/src/hooks/**",
   ],
   coverageThreshold: {
     global: {
