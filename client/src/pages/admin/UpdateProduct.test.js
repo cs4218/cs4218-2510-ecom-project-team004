@@ -417,8 +417,8 @@ describe("UpdateProduct component", () => {
         };
 
         axios.get
-            .mockResolvedValueOnce(productResp)    // getSingleProduct
-            .mockResolvedValueOnce(categoriesResp2); // getAllCategory
+            .mockResolvedValueOnce(productResp)   
+            .mockResolvedValueOnce(categoriesResp2);
         axios.put.mockResolvedValueOnce({ data: { success: true } });
 
         const { container, getByText } = render(
@@ -427,7 +427,7 @@ describe("UpdateProduct component", () => {
             </MemoryRouter>
         );
 
-        await selectAntdOptionByText(container, /*selectIndex=*/ 0, "cat2");
+        await selectAntdOptionByText(container, 0, "cat2");
 
         const btn = await waitFor(() => getByText("UPDATE PRODUCT"));
         await act(async () => {
@@ -441,7 +441,7 @@ describe("UpdateProduct component", () => {
     // This test was made with the help of an LLM
     it("changes shipping via Select and sends the new shipping value", async () => {
         axios.get
-            .mockResolvedValueOnce(productResp) 
+            .mockResolvedValueOnce(productResp)
             .mockResolvedValueOnce(categoriesResp);
         axios.put.mockResolvedValueOnce({ data: { success: true } });
 
@@ -451,7 +451,7 @@ describe("UpdateProduct component", () => {
             </MemoryRouter>
         );
 
-        await selectAntdOptionByText(container, /*selectIndex=*/ 1, "Yes");
+        await selectAntdOptionByText(container, 1, "Yes");
 
         const btn = await waitFor(() => getByText("UPDATE PRODUCT"));
         await act(async () => {
@@ -459,6 +459,6 @@ describe("UpdateProduct component", () => {
         });
 
         const [, body] = axios.put.mock.calls[0];
-        expect(body.get("shipping")).toBe("1"); // changed from "0" -> "1"
+        expect(body.get("shipping")).toBe("1");
     });
 });

@@ -59,6 +59,23 @@ describe("CreateCategory Component", () => {
     });
   });
 
+  it("does not set categories when it fails)", async () => {
+    axios.get.mockResolvedValueOnce({ data: { success: false, category: [{ _id: "x", name: "ShouldNotShow" }] } });
+
+    const { queryByText, getAllByRole } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(axios.get).toHaveBeenCalled());
+
+    expect(queryByText("ShouldNotShow")).not.toBeInTheDocument();
+
+    const rows = getAllByRole("row");
+    expect(rows.length).toBe(1);
+  });
+
   it("submits new category and calls correct API", async () => {
     axios.get.mockResolvedValue({ data: { success: true, category: [] } });
     axios.post.mockResolvedValue({ data: { success: true } });
@@ -348,7 +365,7 @@ describe("CreateCategory Component", () => {
 
     await waitFor(() => {
       const modalEl = document.body.querySelector(".ant-modal");
-      expect(modalEl).toBeTruthy();        
+      expect(modalEl).toBeTruthy();
       expect(modalEl).not.toBeVisible();
       expect(modalEl).toHaveStyle({ display: "none" });
     });
