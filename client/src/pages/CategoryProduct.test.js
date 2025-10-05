@@ -466,7 +466,7 @@ describe('categoryProduct Tests', () => {
     });
   });
 
-  describe('Add to Cart Functionality (if uncommented)', () => {
+  describe('Add to Cart Functionality', () => {
     const mockSetCart = jest.fn();
     const mockCart = [];
 
