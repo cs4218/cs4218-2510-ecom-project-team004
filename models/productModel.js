@@ -9,6 +9,7 @@ const productSchema = new mongoose.Schema(
     slug: {
       type: String,
       required: true,
+      unique: true,
     },
     description: {
       type: String,
@@ -17,6 +18,7 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
+      min: [0, 'Price annot be negative'],
     },
     category: {
       type: mongoose.ObjectId,
@@ -26,6 +28,7 @@ const productSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       required: true,
+      min: 'Quantity cannot be negative'
     },
     photo: {
       data: Buffer,
