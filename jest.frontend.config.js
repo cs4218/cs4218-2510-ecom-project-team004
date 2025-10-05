@@ -20,11 +20,36 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/pages/Auth/*.test.js", "<rootDir>/client/src/components/*.test.js", "<rootDir>/client/src/pages/admin/*.test.js"],
+  testMatch: [
+    "<rootDir>/client/src/components/*.test.js",
+    "<rootDir>/client/src/components/Routes/*.test.js",
+    "<rootDir>/client/src/components/Form/*.test.js",
+    "<rootDir>/client/src/pages/admin/*.test.js",
+    "<rootDir>/client/src/pages/Auth/*.test.js",
+    "<rootDir>/client/src/pages/user/*.test.js",
+    "<rootDir>/client/src/pages/*.test.js",
+    "<rootDir>/client/src/context/*.test.js"
+  ],
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/Auth/**", "client/src/components/**", "client/src/pages/admin/**"],
+  collectCoverageFrom: [
+    "client/src/components/*.js",
+    "client/src/components/Routes/Private.js",
+    "client/src/pages/admin/Users.js",
+    "client/src/pages/Auth/**",
+    "client/src/pages/About.js",
+    "client/src/pages/Contact.js",
+    "client/src/pages/Pagenotfound.js",
+    "client/src/pages/Policy.js",
+    "client/src/pages/user/**",
+    "client/src/pages/Search.js",
+    "client/src/pages/HomePage.js",
+    "client/src/pages/CategoryProduct.js",
+    "client/src/pages/ProductDetails.js",
+    "client/src/components/Form/SearchInput.js",
+    "client/src/context/search.js",
+  ],
   coverageThreshold: {
     global: {
       lines: 100,

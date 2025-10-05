@@ -1,3 +1,5 @@
+// THOUGHT: Should the button provide feedback like "Searching..." when clicked? -- Design choice and not a bug?
+
 import React from "react";
 import { useSearch } from "../../context/search";
 import axios from "axios";
@@ -8,11 +10,17 @@ const SearchInput = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // FIXED: Don't search if keyword is empty or just whitespace
+    if (!values.keyword.trim()) {
+      return;
+    }
+
     try {
       const { data } = await axios.get(
         `/api/v1/product/search/${values.keyword}`
       );
-      setValues({ ...values, results: data });
+      setValues({ ...values, results: data || [] }); // FIXED: Defaults to empty array
       navigate("/search");
     } catch (error) {
       console.log(error);
