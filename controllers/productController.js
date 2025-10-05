@@ -9,46 +9,63 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-//payment gateway
-var gateway = new braintree.BraintreeGateway({
+// Braintree Gateway Configuration
+const gateway = new braintree.BraintreeGateway({
   environment: braintree.Environment.Sandbox,
   merchantId: process.env.BRAINTREE_MERCHANT_ID,
   publicKey: process.env.BRAINTREE_PUBLIC_KEY,
   privateKey: process.env.BRAINTREE_PRIVATE_KEY,
 });
 
+// Read photo safely
+export const safeReadPhoto = (photo) => {
+  if (!photo?.path) return null;
+  try {
+    return {
+      data: fs.readFileSync(photo.path),
+      contentType: photo.type,
+    };
+  } catch (err) {
+    console.error("Failed to read photo:", err);
+    return null;
+  }
+};
+
+// Create product controller
 export const createProductController = async (req, res) => {
   try {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+
+    // Validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res.status(400).send({ error: "Name is required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res.status(400).send({ error: "Description is required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res.status(400).send({ error: "Price is required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res.status(400).send({ error: "Category is required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res.status(400).send({ error: "Quantity is required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(400)
+          .send({ error: "Photo is required and should be less then 1MB" });
     }
 
     const products = new productModel({ ...req.fields, slug: slugify(name) });
     if (photo) {
-      products.photo.data = fs.readFileSync(photo.path);
-      products.photo.contentType = photo.type;
+      const safePhoto = safeReadPhoto(photo);
+      if (safePhoto) products.photo = safePhoto;
     }
+
     await products.save();
     res.status(201).send({
       success: true,
-      message: "Product Created Successfully",
+      message: "Product created successfully",
       products,
     });
   } catch (error) {
@@ -56,7 +73,7 @@ export const createProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in crearing product",
+      message: "Error in creating product",
     });
   }
 };
@@ -156,16 +173,23 @@ export const productPhotoController = async (req, res) => {
   }
 };
 
-//delete controller
+// Delete product controller
 export const deleteProductController = async (req, res) => {
   try {
-    await productModel.findByIdAndDelete(req.params.pid).select("-photo");
+    const deletedProduct = await productModel
+      .findByIdAndDelete(req.params.pid)
+      .select("-photo");
+
+    if (!deletedProduct) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
     res.status(200).send({
       success: true,
-      message: "Product Deleted successfully",
+      message: "Product deleted successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send({
       success: false,
       message: "Error while deleting product",
@@ -174,28 +198,29 @@ export const deleteProductController = async (req, res) => {
   }
 };
 
-//upate producta
+// Update product controller
 export const updateProductController = async (req, res) => {
   try {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //validation
+
+    // Validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res.status(400).send({ error: "Name is required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res.status(400).send({ error: "Description is required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res.status(400).send({ error: "Price is required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res.status(400).send({ error: "Category is required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res.status(400).send({ error: "Quantity is required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(400)
+          .send({ error: "Photo is required and should be less then 1MB" });
     }
 
     const products = await productModel.findByIdAndUpdate(
@@ -203,14 +228,20 @@ export const updateProductController = async (req, res) => {
       { ...req.fields, slug: slugify(name) },
       { new: true }
     );
-    if (photo) {
-      products.photo.data = fs.readFileSync(photo.path);
-      products.photo.contentType = photo.type;
+
+    if (!products) {
+      return res.status(404).send({ error: "Product not found" });
     }
+
+    if (photo) {
+      const safePhoto = safeReadPhoto(photo);
+      if (safePhoto) products.photo = safePhoto;
+    }
+
     await products.save();
-    res.status(201).send({
+    res.status(200).send({
       success: true,
-      message: "Product Updated Successfully",
+      message: "Product updated successfully",
       products,
     });
   } catch (error) {
@@ -218,7 +249,7 @@ export const updateProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in Updte product",
+      message: "Error in updating product",
     });
   }
 };
@@ -413,180 +444,92 @@ export const productCategoryController = async (req, res) => {
   }
 };
 
-//payment gateway api
-//token
+// Payment Gateway API
+// Generate Token
 export const braintreeTokenController = async (req, res) => {
   try {
-    gateway.clientToken.generate({}, function (err, response) {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(response);
-      }
+    const response = await new Promise((resolve, reject) => {
+      gateway.clientToken.generate({}, (err, resp) => {
+        if (err) reject(new Error(err));
+        else resolve(resp);
+      });
     });
+
+    return res.send(response);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).send({ error: "Failed to generate token" });
   }
 };
 
-// //payment
-// export const brainTreePaymentController = async (req, res) => {
-//   try {
-//     const { nonce, cart } = req.body;
-//     let total = 0;
-//     cart.map((i) => {
-//       total += i.price;
-//     });
-//     let newTransaction = gateway.transaction.sale(
-//       {
-//         amount: total,
-//         paymentMethodNonce: nonce,
-//         options: {
-//           submitForSettlement: true,
-//         },
-//       },
-//       function (error, result) {
-//         if (result) {
-//           const order = new orderModel({
-//             products: cart,
-//             payment: result,
-//             buyer: req.user._id,
-//           }).save();
-//           res.json({ ok: true });
-//         } else {
-//           res.status(500).send(error);
-//         }
-//       }
-//     );
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-// FIXED: The above code had floating point precision issues and total amount should be a string for braintree
-// NOTE: The code below was written with the help of an LLM
-// payment 
+// Process Payment
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
 
-    // STEP 1: Calculate the total in cents to avoid floating-point errors.
-    // We multiply each price by 100 and use Math.round() for safety,
-    // then sum the integer values.
-    const totalInCents = cart.reduce((sum, item) => {
-      // Ensure the price is a number and convert to cents
-      const priceInCents = Math.round(Number(item.price) * 100);
-      return sum + priceInCents;
-    }, 0);
+    // Validate cart existence and non-empty
+    if (!cart || cart.length === 0)
+      return res.status(400).send({ error: "Cart cannot be empty" });
 
-    // STEP 2: Convert the total back to a fixed-point string for Braintree API.
-    // The Braintree API expects the amount as a string with 2 decimal places.
-    const totalAmount = (totalInCents / 100).toFixed(2);
+    // Validate nonce
+    if (!nonce || typeof nonce !== "string" || nonce.trim() === "") {
+      return res.status(400).send({ error: "Payment nonce required" });
+    }
 
+    // Validate each price in the cart
+    for (const item of cart) {
+      const price = Number(item.price);
+
+      // Must be a valid number and non-negative
+      if (isNaN(price) || price < 0) {
+        return res.status(400).send({ error: "Invalid price in cart" });
+      }
+    }
+
+    // Calculate total amount
+    const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    // Round to 2 decimal places to avoid floating point issues
+    const roundedTotal = Math.round((total + Number.EPSILON) * 100) / 100;
+    // Convert to string with 2 decimal places (Braintree requirement)
+    const amountAsString = roundedTotal.toFixed(2);
+
+    // Call Braintree API to process payment
     gateway.transaction.sale(
       {
-        amount: totalAmount, // Pass the formatted string to Braintree
+        amount: amountAsString,
         paymentMethodNonce: nonce,
         options: {
           submitForSettlement: true,
         },
       },
-      function (error, result) {
+      async (error, result) => {
         if (error) {
-          // This path handles network or communication errors with Braintree.
-          return res.status(500).send(error);
+          return res.status(500).send({ error: error.message });
         }
 
-        // STEP 3: Handle the Braintree result correctly.
-        // Check for result and result.success to handle both success and failure outcomes.
-        if (result && result.success) {
-          const order = new orderModel({
+        if (!result.success) {
+          return res.status(500).send({
+            error: "Transaction failed",
+            details: result,
+          });
+        }
+
+        try {
+          await new orderModel({
             products: cart,
             payment: result,
             buyer: req.user._id,
-          });
-          order.save();
-          res.json({ ok: true });
-        } else {
-          // This path handles a declined transaction (e.g., insufficient funds).
-          console.error("Braintree Transaction Failed:", result.message);
-          return res.status(500).send({ error: result.message });
+          }).save();
+
+          return res.json({ ok: true });
+        } catch (dbError) {
+          console.error("Database error while saving order:", dbError);
+          return res.status(500).send({ error: "Failed to save order" });
         }
       }
     );
   } catch (error) {
-    console.log(error);
-    // res.status(500).send({ error: "Something went wrong" }); // Is this needed, or more of a design choice?
+    console.error(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
-/*
-Summary of what each function in productController.js does
-NOTE: The following summary was written with the help of an LLM
-
-🛍️ Product Controllers
-📦 createProductController
-- Validates required fields and photo size.
-- Creates a new product document with a slug.
-- Reads photo file and stores binary data.
-- Saves product to MongoDB.
-📋 getProductController
-- Fetches up to 12 products.
-- Populates category info.
-- Excludes photo data for performance.
-- Sorts by newest.
-🔍 getSingleProductController
-- Fetches one product by slug.
-- Populates category.
-- Excludes photo.
-🖼️ productPhotoController
-- Retrieves photo binary data by product ID.
-- Sets correct content type and sends image.
-🗑️ deleteProductController
-- Deletes product by ID.
-- Excludes photo from query.
-✏️ updateProductController
-- Validates input.
-- Updates product fields and slug.
-- Handles optional photo update.
-- Saves changes.
-
-🧪 Filtering & Searching
-🧮 productFiltersController
-- Filters products by:
-- Category (checked)
-- Price range (radio)
-- Returns matching products.
-🔢 productCountController
-- Returns total number of products using estimatedDocumentCount().
-📄 productListController
-- Implements pagination:
-- 6 products per page.
-- Skips and limits based on page number.
-- Sorted by creation date.
-🔎 searchProductController
-- Searches products by keyword in:
-- name
-- description
-- Uses case-insensitive regex.
-🧩 realtedProductController
-- Fetches up to 3 products in the same category.
-- Excludes the current product (_id: { $ne: pid }).
-🗂️ productCategoryController
-- Finds category by slug.
-- Returns all products in that category.
-
-💰 Payment Controllers
-🔐 braintreeTokenController
-- Generates a client token for Braintree.
-- Used on frontend to initialize payment UI.
-💳 brainTreePaymentController
-- Accepts:
-- nonce: payment method token from frontend.
-- cart: array of products.
-- Calculates total price.
-- Initiates transaction with Braintree.
-- On success:
-- Saves order to DB.
-- Returns confirmation.
-*/

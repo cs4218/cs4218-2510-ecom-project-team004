@@ -1620,6 +1620,229 @@ describe('HomePage Component - Unit Tests', () => {
         });
     });
 
+    describe('Description Length Handling', () => {
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with missing description', async () => {
+            const productsWithNoDesc = [{
+                _id: 'desc-test-1',
+                name: 'No Description Product',
+                description: undefined,
+                price: 50,
+                slug: 'no-desc'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithNoDesc } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('No description.')).toBeInTheDocument();
+            });
+        });
+
+        test('handles product with description of length 0', async () => {
+            const productsWithShortDesc = [{
+                _id: 'desc-test-2',
+                name: 'Zero Length Description Product',
+                description: '',
+                price: 50,
+                slug: 'zero-len-desc'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithShortDesc } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Zero Length Description Product')).toBeInTheDocument();
+            });
+        });
+
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with description of length 1', async () => {
+            const productsWithShortDesc = [{
+                _id: 'desc-test-3',
+                name: 'Short Description Product',
+                description: 'A',
+                price: 50,
+                slug: 'short-desc'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithShortDesc } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Short Description Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText('A')).toBeInTheDocument();
+        });
+
+        test('handles product with description of length 59', async () => {
+            const desc59 = 'A'.repeat(59);
+            const productsWithDesc59 = [{
+                _id: 'desc-test-4',
+                name: 'Length 59 Product',
+                description: desc59,
+                price: 50,
+                slug: 'desc-59'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithDesc59 } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Length 59 Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText(desc59)).toBeInTheDocument();
+        });
+
+        test('handles product with description of length 60', async () => {
+            const desc60 = 'B'.repeat(60);
+            const productsWithDesc60 = [{
+                _id: 'desc-test-5',
+                name: 'Length 60 Product',
+                description: desc60,
+                price: 50,
+                slug: 'desc-60'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithDesc60 } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Length 60 Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText(desc60)).toBeInTheDocument();
+        });
+
+        test('handles product with description of length 61', async () => {
+            const desc61 = 'C'.repeat(61);
+            const desc60Truncated = 'C'.repeat(60);
+            const productsWithDesc61 = [{
+                _id: 'desc-test-6',
+                name: 'Length 61 Product',
+                description: desc61,
+                price: 50,
+                slug: 'desc-61'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithDesc61 } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Length 61 Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText(desc60Truncated + '...')).toBeInTheDocument();
+        });
+
+        test('handles product with very long description', async () => {
+            const descLong = 'D'.repeat(200);
+            const desc60Truncated = 'D'.repeat(60);
+            const productsWithLongDesc = [{
+                _id: 'desc-test-7',
+                name: 'Very Long Description Product',
+                description: descLong,
+                price: 50,
+                slug: 'long-desc'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productsWithLongDesc } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Very Long Description Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText(desc60Truncated + '...')).toBeInTheDocument();
+        });
+    });
+
     describe('Page Number State Management', () => {
         // NOTE: The test below was written with the help of an LLM
         test('page starts at 1 on initial load', async () => {
@@ -1965,6 +2188,105 @@ describe('HomePage Component - Unit Tests', () => {
         });
     });
 
+    describe('Price Handling', () => {
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with missing price', async () => {
+            const productWithNoPrice = [{
+                _id: 'price-test-1',
+                name: 'Mystery Product',
+                description: 'Product without price',
+                price: undefined,
+                slug: 'mystery-product'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productWithNoPrice } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Mystery Product')).toBeInTheDocument();
+            });
+
+            // Price undefined should render as $0.00
+            expect(screen.getByText('$0.00')).toBeInTheDocument();
+        });
+
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with null price', async () => {
+            const productWithNullPrice = [{
+                _id: 'price-test-2',
+                name: 'Null Price Product',
+                description: 'Product with null price',
+                price: null,
+                slug: 'null-price-product'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productWithNullPrice } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Null Price Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText('$0.00')).toBeInTheDocument();
+        });
+
+        // NOTE: The test below was written with the help of an LLM
+        test('handles product with price of 0', async () => {
+            const productWithZeroPrice = [{
+                _id: 'price-test-3',
+                name: 'Free Product',
+                description: 'Product that is free',
+                price: 0,
+                slug: 'free-product'
+            }];
+
+            axios.get.mockImplementation((url) => {
+                if (url === '/api/v1/category/get-category') {
+                    return Promise.resolve({ data: { success: true, category: [] } });
+                }
+                if (url === '/api/v1/product/product-count') {
+                    return Promise.resolve({ data: { total: 1 } });
+                }
+                if (url.includes('/api/v1/product/product-list/')) {
+                    return Promise.resolve({ data: { products: productWithZeroPrice } });
+                }
+                return Promise.resolve({ data: {} });
+            });
+
+            renderHomePage();
+
+            await waitFor(() => {
+                expect(screen.getByText('Free Product')).toBeInTheDocument();
+            });
+
+            expect(screen.getByText('$0.00')).toBeInTheDocument();
+        });
+    });
+
     describe('Edge Cases', () => {
         // NOTE: The test below was written with the help of an LLM
         test('handles empty categories response', async () => {
@@ -1986,37 +2308,6 @@ describe('HomePage Component - Unit Tests', () => {
             await waitFor(() => {
                 expect(screen.queryByText('Product 1')).not.toBeInTheDocument();
                 expect(screen.queryByText(/Loadmore/)).not.toBeInTheDocument();
-            });
-        });
-
-        // NOTE: The test below was written with the help of an LLM
-        test('truncates long product descriptions correctly', async () => {
-            const longDescription = 'A'.repeat(100);
-            const productWithLongDesc = [{
-                _id: 'prod1',
-                name: 'Product 1',
-                price: 10,
-                description: longDescription,
-                slug: 'product-1'
-            }];
-
-            axios.get.mockImplementation((url) => {
-                if (url === '/api/v1/category/get-category') {
-                    return Promise.resolve({ data: { success: true, category: [] } });
-                }
-                if (url === '/api/v1/product/product-count') {
-                    return Promise.resolve({ data: { total: 1 } });
-                }
-                if (url.includes('/api/v1/product/product-list/')) {
-                    return Promise.resolve({ data: { products: productWithLongDesc } });
-                }
-                return Promise.resolve({ data: {} });
-            });
-
-            renderHomePage();
-
-            await waitFor(() => {
-                expect(screen.getByText('A'.repeat(60) + '...')).toBeInTheDocument();
             });
         });
 
