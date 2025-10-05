@@ -75,7 +75,7 @@ describe('createCategoryController Component', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: 'Category Already Exisits',
+      message: 'Category Already Exists',
     });
     expect(categoryModel).not.toHaveBeenCalled();
     expect(categoryModel.__saveMock).not.toHaveBeenCalled();
@@ -251,7 +251,7 @@ describe("singleCategoryController Component", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: 'Get SIngle Category SUccessfully',
+      message: 'Get Single Category Successfully',
       category: doc,
     });
   });
@@ -268,7 +268,7 @@ describe("singleCategoryController Component", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: 'Get SIngle Category SUccessfully',
+      message: 'Get Single Category Successfully',
       category: null,
     });
   });
