@@ -1,9 +1,10 @@
-/**
- * Tests for createCategoryController, updateCategoryController, deleteCategoryController
- * Works with ESM paths (notice the .js at import paths).
- */
+import categoryModel from '../models/categoryModel.js';
+import {
+  createCategoryController,
+  updateCategoryController,
+  deleteCategoryController,
+} from './categoryController.js';
 
-// ---- inline mocks (no out-of-scope variables) ----
 jest.mock('slugify', () => {
   return {
     __esModule: true,
@@ -12,37 +13,23 @@ jest.mock('slugify', () => {
 });
 
 jest.mock('../models/categoryModel.js', () => {
-  // define everything INSIDE the factory to avoid the out-of-scope error
   const __saveMock = jest.fn();
 
-  // constructor used as: new categoryModel({...}).save()
   const Model = jest.fn(function (data) {
-    // mimic a mongoose doc instance with a save method
     Object.assign(this, data);
     this.save = __saveMock;
     return this;
   });
 
-  // static methods your controller calls
   Model.findOne = jest.fn();
   Model.findByIdAndUpdate = jest.fn();
   Model.findByIdAndDelete = jest.fn();
 
-  // expose the save mock so tests can control its resolution
   Model.__saveMock = __saveMock;
 
   return { __esModule: true, default: Model };
 });
 
-// Now import after mocks (Jest hoists jest.mock calls)
-import categoryModel from '../models/categoryModel.js';
-import {
-  createCategoryController,
-  updateCategoryController,
-  deleteCategoryController, // note the capital O in your source
-} from './categoryController.js';
-
-// ---- tiny req/res helpers ----
 const mockReq = (overrides = {}) => ({ body: {}, params: {}, ...overrides });
 const mockRes = () => {
   const res = {};
@@ -55,7 +42,6 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-/* ------------------ CREATE ------------------ */
 describe('createCategoryController', () => {
   it('400 when name missing', async () => {
     const req = mockReq({ body: {} });
@@ -130,7 +116,6 @@ describe('createCategoryController', () => {
   });
 });
 
-/* ------------------ UPDATE ------------------ */
 describe('updateCategoryController', () => {
   it('200 on successful update (slugified)', async () => {
     const updated = { _id: 'cid', name: 'NewName', slug: 'slug-NewName' };
