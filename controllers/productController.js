@@ -85,19 +85,19 @@ export const getProductController = async (req, res) => {
       .find({})
       .populate("category")
       .select("-photo")
-      .limit(12)
+      .limit(12) // Hardcoded
       .sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
-      counTotal: products.length,
-      message: "ALlProducts ",
+      countTotal: products.length, // FIXED: counTotal --> countTotal
+      message: "All Products",  // FIXED: ALlProducts --> AllProducts
       products,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Erorr in getting products",
+      message: "Error in getting products", // FIXED: Erorr --> Error
       error: error.message,
     });
   }
@@ -109,6 +109,17 @@ export const getSingleProductController = async (req, res) => {
       .findOne({ slug: req.params.slug })
       .select("-photo")
       .populate("category");
+
+    // FIXED: Added  
+    // NOTE: Had help from an LLM
+    // Check if product exists
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
     res.status(200).send({
       success: true,
       message: "Single Product Fetched",
@@ -118,7 +129,7 @@ export const getSingleProductController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror while getitng single product",
+      message: "Error while getting single product", // FIXED: Eror while getitng single product --> Error while getting single product 
       error,
     });
   }
@@ -128,15 +139,35 @@ export const getSingleProductController = async (req, res) => {
 export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
-    if (product.photo.data) {
+
+    // FIXED: Added  
+    // NOTE: Had help from an LLM
+    // Check if product exists
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // FIXED: Added "product.photo &&"
+    if (product.photo && product.photo.data) {
       res.set("Content-type", product.photo.contentType);
       return res.status(200).send(product.photo.data);
     }
+
+    // ADDED
+    // NOTE: Had help from an LLM
+    // Handle case where photo doesn't exist or has no data
+    return res.status(404).send({
+      success: false,
+      message: "Photo not found for this product",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Erorr while getting photo",
+      message: "Error while getting photo", // FIXED: Erorr --> Error
       error,
     });
   }
@@ -226,10 +257,32 @@ export const updateProductController = async (req, res) => {
 // filters
 export const productFiltersController = async (req, res) => {
   try {
-    const { checked, radio } = req.body;
+    // const { checked, radio} = req.body; // FIXED: Added default values  NOTE: Had help from an LLM
+    const body = req.body || {};
+    const checked = Array.isArray(body.checked) ? body.checked : [];
+    const radio = Array.isArray(body.radio) ? body.radio : [];
+
     let args = {};
-    if (checked.length > 0) args.category = checked;
-    if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
+    if (Array.isArray(checked) && checked.length > 0) args.category = { $in: checked }; // FIXED: checked --> { $in: checked } AND added "Array.isArray(checked) &&"   NOTE: Had help from an LLM
+    // if (radio.length >= 2) args.price = { $gte: radio[0], $lte: radio[1] }; // FIXED: Added "radio.length >= 2"
+
+    // FIXED: Added radio validation
+    // NOTE: Had help from an LLM
+    if (Array.isArray(radio) && radio.length >= 2) {
+      const [minPrice, maxPrice] = radio;
+      if (
+        typeof minPrice === 'number' &&
+        typeof maxPrice === 'number' &&
+        !isNaN(minPrice) &&
+        !isNaN(maxPrice) &&
+        isFinite(minPrice) &&
+        isFinite(maxPrice) &&
+        minPrice >= 0 &&
+        maxPrice >= minPrice
+      ) {
+        args.price = { $gte: minPrice, $lte: maxPrice };
+      }
+    }
     const products = await productModel.find(args);
     res.status(200).send({
       success: true,
@@ -239,7 +292,7 @@ export const productFiltersController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Filtering Products",
+      message: "Error while filtering products", // FIXED: While Filtering Products --> while filtering products
       error,
     });
   }
@@ -248,7 +301,7 @@ export const productFiltersController = async (req, res) => {
 // product count
 export const productCountController = async (req, res) => {
   try {
-    const total = await productModel.find({}).estimatedDocumentCount();
+    const total = await productModel.estimatedDocumentCount(); // FIXED: removed ".find({})"
     res.status(200).send({
       success: true,
       total,
@@ -267,28 +320,49 @@ export const productCountController = async (req, res) => {
 export const productListController = async (req, res) => {
   try {
     const perPage = 6;
-    const page = req.params.page ? req.params.page : 1;
+    // const page = req.params.page ? req.params.page : 1;
+
+    // FIXED: Consistent default handling using parseInt()
+    // NOTE: Had help from an LLM
+    const page = parseInt(req.params.page) || 1;
+
+    // FIXED: Validate page number (reject negative/zero)
+    // NOTE: Had help from an LLM
+    if (page < 1) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid page number",
+      });
+    }
+
     const products = await productModel
       .find({})
       .select("-photo")
       .skip((page - 1) * perPage)
       .limit(perPage)
       .sort({ createdAt: -1 });
+
+    // FIXED: Get total count for pagination UI    NOTE: Had help from an LLM
+    const total = await productModel.countDocuments({});
+
     res.status(200).send({
       success: true,
       products,
+      currentPage: page,                      // Current page number - ADDED
+      totalPages: Math.ceil(total / perPage), // Total pages available - ADDED
+      totalProducts: total,                   // Total product count - ADDED
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "error in per page ctrl",
+      message: "Error in per page ctrl",
       error,
     });
   }
 };
 
-// search product
+// search product ---------------------------------------------- Think this has no bugs??
 export const searchProductController = async (req, res) => {
   try {
     const { keyword } = req.params;
@@ -305,14 +379,14 @@ export const searchProductController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error In Search Product API",
+      message: "Error in search product API", // FIXED: Error In Search Product API --> Error in search product API
       error,
     });
   }
 };
 
-// similar products
-export const realtedProductController = async (req, res) => {
+// similar products ----------------------------------------------- Think this has no bugs?
+export const realtedProductController = async (req, res) => {  // TYPO CAUSING BUG??? - Maybe leave for integration testing...
   try {
     const { pid, cid } = req.params;
     const products = await productModel
@@ -329,10 +403,10 @@ export const realtedProductController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(400).send({
+    res.status(400).send({ // For all these, I believe 500 error is better for server side?... But this just a design choice, not bug?
       success: false,
-      message: "error while geting related product",
-      error,
+      message: "Error while getting related product",
+      error, // And for all these, not safe to send the error object, just the message instead?... But this just a design choice, not bug?
     });
   }
 };
@@ -341,7 +415,20 @@ export const realtedProductController = async (req, res) => {
 export const productCategoryController = async (req, res) => {
   try {
     const category = await categoryModel.findOne({ slug: req.params.slug });
-    const products = await productModel.find({ category }).populate("category");
+
+    // FIXED: Added category validation
+    // NOTE: Had help from an LLM
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    // FIXED: Pass only the _id
+    // const products = await productModel.find({ category }).populate("category");
+    const products = await productModel.find({ category: category._id }).populate("category");
+
     res.status(200).send({
       success: true,
       category,
@@ -352,7 +439,7 @@ export const productCategoryController = async (req, res) => {
     res.status(400).send({
       success: false,
       error,
-      message: "Error While Getting products",
+      message: "Error while getting products", // FIXED: Error While Getting products --> Error while getting products
     });
   }
 };

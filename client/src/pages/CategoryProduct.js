@@ -3,11 +3,15 @@ import Layout from "../components/Layout";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/CategoryProductStyles.css";
 import axios from "axios";
+import toast from "react-hot-toast";  // ADDED
+import { useCart } from "../context/cart";  // ADDED
+
 const CategoryProduct = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
+  const [cart, setCart] = useCart(); // ADDED
 
   useEffect(() => {
     if (params?.slug) getPrductsByCat();
@@ -43,14 +47,21 @@ const CategoryProduct = () => {
                     <div className="card-name-price">
                       <h5 className="card-title">{p.name}</h5>
                       <h5 className="card-title card-price">
-                        {p.price.toLocaleString("en-US", {
+                        {/* FIXED: Added check for missing price */}
+                        {(p.price ?? 0).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
                       </h5>
                     </div>
                     <p className="card-text ">
-                      {p.description.substring(0, 60)}...
+                      {/* FIXED: Added checks for description */}
+                      {p.description
+                        ? p.description.length > 60
+                          ? `${p.description.substring(0, 60)}...`   // Show "..." only if cut text
+                          : p.description                            // Show full text if it's short
+                        : "No description."                          // Show message if missing
+                      }
                     </p>
                     <div className="card-name-price">
                       <button
@@ -59,7 +70,8 @@ const CategoryProduct = () => {
                       >
                         More Details
                       </button>
-                      {/* <button
+                      { /* FIXED: Uncommented */ }
+                      <button
                     className="btn btn-dark ms-1"
                     onClick={() => {
                       setCart([...cart, p]);
@@ -71,12 +83,13 @@ const CategoryProduct = () => {
                     }}
                   >
                     ADD TO CART
-                  </button> */}
+                  </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+            {/* I'm going to consider load more feature a design choice! */}
             {/* <div className="m-2 p-3">
             {products && products.length < total && (
               <button
