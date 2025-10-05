@@ -22,6 +22,7 @@ export default {
   // only run these tests
   testMatch: [
     "<rootDir>/client/src/components/*.test.js",
+    "<rootDir>/client/src/components/Routes/*.test.js",
     "<rootDir>/client/src/pages/admin/*.test.js",
     "<rootDir>/client/src/pages/Auth/*.test.js",
     "<rootDir>/client/src/pages/user/*.test.js",
@@ -32,6 +33,7 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: [
     "client/src/components/*.js",
+    "client/src/components/Routes/Private.js",
     "client/src/pages/admin/Users.js",
     "client/src/pages/Auth/**",
     "client/src/pages/About.js",
