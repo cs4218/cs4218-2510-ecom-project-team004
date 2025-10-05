@@ -34,7 +34,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/cart';
 import Search from './Search';
 
-describe('Search Component - Unit Tests', () => {
+describe('Search Component Tests', () => {
     beforeAll(() => {
         jest.spyOn(console, 'error').mockImplementation((msg, ...args) => {
             throw new Error(msg, ...args);
