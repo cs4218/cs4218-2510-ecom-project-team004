@@ -21,21 +21,26 @@ export default {
 
   // only run these tests
   testMatch: [
-      "<rootDir>/models/userModel.test.js", 
-      "<rootDir>/client/src/pages/Auth/*.test.js",
-      "<rootDir>/client/src/pages/user/Dashboard.test.js", 
-      "<rootDir>/client/src/components/UserMenu.test.js",
-      "<rootDir>/client/src/components/Routes/Private.test.js"
+    "<rootDir>/client/src/components/*.test.js",
+    "<rootDir>/client/src/components/Routes/*.test.js",
+    "<rootDir>/client/src/pages/admin/*.test.js",
+    "<rootDir>/client/src/pages/Auth/*.test.js",
+    "<rootDir>/client/src/pages/user/*.test.js",
+    "<rootDir>/client/src/pages/*.test.js",
   ],
 
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
-      "models/userModel.js", 
-      "client/src/pages/Auth/**", 
-      "client/src/pages/user/Dashboard.js", 
-      "client/src/components/UserMenu.js", 
-      "client/src/components/Routes/Private.js"
+    "client/src/components/*.js",
+    "client/src/components/Routes/Private.js",
+    "client/src/pages/admin/Users.js",
+    "client/src/pages/Auth/**",
+    "client/src/pages/About.js",
+    "client/src/pages/Contact.js",
+    "client/src/pages/Pagenotfound.js",
+    "client/src/pages/Policy.js",
+    "client/src/pages/user/**"
   ],
   coverageThreshold: {
     global: {
