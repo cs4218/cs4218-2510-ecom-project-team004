@@ -20,7 +20,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 
 ## 4. Members Scope
 **Milestone 1**
-- Baig Taemur:
+- Baig Taemur: Added unit testing (with the help of GenAI) and fixed bugs. Files worked on: AdminMenu.js, AdminDashboard.js, CategoryForm.js, CreateCategory.js, CreateProduct.js, UpdateProduct.js, categoryController.js (within it: createCategoryController, updateCategoryController, deleteCategoryController, categoryController and singleCategoryController), useCategory.js, Categories.js and categoryModel.js.
 - Daphne Shaine Wilhelmina:
   Adding test code for unit testing (with the help of GenAI), improving relevant code quality, and fixing relevant code for Admin View Orders, Admin View Products (Client + Server), Cart, and Payment features.
 - Foo Lin Xuan:
