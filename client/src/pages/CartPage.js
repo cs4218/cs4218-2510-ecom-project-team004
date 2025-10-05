@@ -1,71 +1,138 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Layout from "./../components/Layout";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import DropIn from "braintree-web-drop-in-react";
-import { AiFillWarning } from "react-icons/ai";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "../styles/CartStyles.css";
 
 const CartPage = () => {
-  const [auth, setAuth] = useAuth();
+  const [auth] = useAuth();
   const [cart, setCart] = useCart();
   const [clientToken, setClientToken] = useState("");
   const [instance, setInstance] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  //total price
-  const totalPrice = () => {
+  // Merge cart items by _id and check for data consistency.
+  // If same _id but different details, treat as separate items.
+  // Each conflicting item gets a unique conflictKey to ensure stable keys in React.
+  // Using GenAI to help write this merge cart logic.
+  const mergedCart = useMemo(() => {
+    const merged = [];
+
+    const areDetailsSame = (a, b) =>
+      a.name === b.name &&
+      a.price === b.price &&
+      a.description === b.description;
+
+    for (const item of cart) {
+      if (!item || !item._id) {
+        console.warn("Invalid cart item detected:", item);
+        continue;
+      }
+
+      const existingIndex = merged.findIndex((m) => m._id === item._id);
+
+      if (existingIndex > -1) {
+        const existing = merged[existingIndex];
+
+        if (areDetailsSame(existing, item)) {
+          // Merge quantities if product details match
+          existing.userQuantity += 1;
+        } else {
+          // Handle conflict by adding as a separate entry
+          console.error("Data mismatch for same product ID detected:", {
+            existing,
+            incoming: item,
+          });
+
+          // If the existing item doesn't already have a conflictKey, assign one now
+          if (!existing.conflictKey) {
+            existing.conflictKey = `${existing._id}-${Math.random()
+              .toString(36)
+              .substring(2, 9)}-0`;
+          }
+
+          // Add the new conflicting item with its own unique conflictKey
+          merged.push({
+            ...item,
+            userQuantity: 1,
+            conflictKey: `${item._id}-${Math.random()
+              .toString(36)
+              .substring(2, 9)}-${merged.length}`,
+          });
+        }
+      } else {
+        // First time seeing this item
+        merged.push({ ...item, userQuantity: 1 });
+      }
+    }
+
+    return merged;
+  }, [cart]);
+
+  // Total price calculation
+  const totalPrice = useMemo(() => {
     try {
       let total = 0;
-      cart?.map((item) => {
-        total = total + item.price;
-      });
+      for (const item of mergedCart) {
+        const priceNum = Number(item.price) || 0;
+        const qtyNum = Number(item.userQuantity);
+        total += priceNum * qtyNum;
+      }
+
       return total.toLocaleString("en-US", {
         style: "currency",
         currency: "USD",
       });
     } catch (error) {
-      console.log(error);
+      console.error("Error calculating total price:", error);
+      return "$0.00";
     }
-  };
-  //detele item
+  }, [mergedCart]);
+
+  // Remove one item at a time
   const removeCartItem = (pid) => {
     try {
-      let myCart = [...cart];
-      let index = myCart.findIndex((item) => item._id === pid);
-      myCart.splice(index, 1);
-      setCart(myCart);
-      localStorage.setItem("cart", JSON.stringify(myCart));
+      const index = cart.findLastIndex((item) => item._id === pid);
+
+      if (index > -1) {
+        const updatedCart = [...cart];
+        updatedCart.splice(index, 1);
+
+        setCart(updatedCart);
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error removing item:", error);
     }
   };
 
-  //get payment gateway token
+  // Get payment gateway token
   const getToken = async () => {
     try {
       const { data } = await axios.get("/api/v1/product/braintree/token");
       setClientToken(data?.clientToken);
     } catch (error) {
-      console.log(error);
+      console.log("Error fetching payment token:", error);
     }
   };
+
   useEffect(() => {
     getToken();
   }, [auth?.token]);
 
-  //handle payments
+  // Handle payments
   const handlePayment = async () => {
     try {
       setLoading(true);
       const { nonce } = await instance.requestPaymentMethod();
-      const { data } = await axios.post("/api/v1/product/braintree/payment", {
+      await axios.post("/api/v1/product/braintree/payment", {
         nonce,
-        cart,
+        cart: mergedCart,
       });
       setLoading(false);
       localStorage.removeItem("cart");
@@ -73,34 +140,44 @@ const CartPage = () => {
       navigate("/dashboard/user/orders");
       toast.success("Payment Completed Successfully ");
     } catch (error) {
-      console.log(error);
+      console.log("Payment failed:", error);
       setLoading(false);
+      toast.error("Payment failed. Please try again or check your details.");
     }
   };
+
   return (
     <Layout>
-      <div className=" cart-page">
+      <div className="cart-page">
         <div className="row">
           <div className="col-md-12">
             <h1 className="text-center bg-light p-2 mb-1">
               {!auth?.user
                 ? "Hello Guest"
-                : `Hello  ${auth?.token && auth?.user?.name}`}
+                : `Hello ${auth?.token && auth?.user?.name}`}
               <p className="text-center">
-                {cart?.length
-                  ? `You Have ${cart.length} items in your cart ${
-                      auth?.token ? "" : "please login to checkout !"
-                    }`
-                  : " Your Cart Is Empty"}
+                {mergedCart.length
+                  ? (() => {
+                      const loginMessage = auth?.token
+                        ? ""
+                        : "Please login to checkout!";
+                      return `You Have ${cart.length} total items ${loginMessage}`;
+                    })()
+                  : "Your Cart Is Empty"}
               </p>
             </h1>
           </div>
         </div>
-        <div className="container ">
-          <div className="row ">
-            <div className="col-md-7  p-0 m-0">
-              {cart?.map((p) => (
-                <div className="row card flex-row" key={p._id}>
+
+        <div className="container">
+          <div className="row">
+            {/* Cart Items */}
+            <div className="col-md-7 p-0 m-0">
+              {mergedCart.map((p, index) => (
+                <div
+                  className="row card flex-row"
+                  key={p.conflictKey || `${p._id}-${index}`}
+                >
                   <div className="col-md-4">
                     <img
                       src={`/api/v1/product/product-photo/${p._id}`}
@@ -112,8 +189,12 @@ const CartPage = () => {
                   </div>
                   <div className="col-md-4">
                     <p>{p.name}</p>
-                    <p>{p.description.substring(0, 30)}</p>
-                    <p>Price : {p.price}</p>
+                    <p>
+                      {p.description?.substring(0, 30) ||
+                        "No description available"}
+                    </p>
+                    <p>Price: {p.price}</p>
+                    <p>Quantity: {p.userQuantity}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
                     <button
@@ -126,49 +207,44 @@ const CartPage = () => {
                 </div>
               ))}
             </div>
-            <div className="col-md-5 cart-summary ">
+
+            {/* Cart Summary */}
+            <div className="col-md-5 cart-summary">
               <h2>Cart Summary</h2>
               <p>Total | Checkout | Payment</p>
               <hr />
-              <h4>Total : {totalPrice()} </h4>
-              {auth?.user?.address ? (
-                <>
-                  <div className="mb-3">
-                    <h4>Current Address</h4>
-                    <h5>{auth?.user?.address}</h5>
+              <h4>Total: {totalPrice}</h4>
+
+              {/* Address Section */}
+              <div className="mb-3">
+                {auth?.token ? (
+                  <>
+                    {auth?.user?.address && (
+                      <>
+                        <h4>Current Address</h4>
+                        <h5>{auth.user.address}</h5>
+                      </>
+                    )}
                     <button
                       className="btn btn-outline-warning"
                       onClick={() => navigate("/dashboard/user/profile")}
                     >
                       Update Address
                     </button>
-                  </div>
-                </>
-              ) : (
-                <div className="mb-3">
-                  {auth?.token ? (
-                    <button
-                      className="btn btn-outline-warning"
-                      onClick={() => navigate("/dashboard/user/profile")}
-                    >
-                      Update Address
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-outline-warning"
-                      onClick={() =>
-                        navigate("/login", {
-                          state: "/cart",
-                        })
-                      }
-                    >
-                      Plase Login to checkout
-                    </button>
-                  )}
-                </div>
-              )}
+                  </>
+                ) : (
+                  <button
+                    className="btn btn-outline-warning"
+                    onClick={() => navigate("/login", { state: "/cart" })}
+                  >
+                    Please Login to checkout
+                  </button>
+                )}
+              </div>
+
+              {/* Payment Section */}
               <div className="mt-2">
-                {!clientToken || !auth?.token || !cart?.length ? (
+                {!clientToken || !auth?.token || !mergedCart.length ? (
                   ""
                 ) : (
                   <>
@@ -181,7 +257,6 @@ const CartPage = () => {
                       }}
                       onInstance={(instance) => setInstance(instance)}
                     />
-
                     <button
                       className="btn btn-primary"
                       onClick={handlePayment}
