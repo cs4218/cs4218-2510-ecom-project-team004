@@ -24,6 +24,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 - Daphne Shaine Wilhelmina:
   Adding test code for unit testing (with the help of GenAI), improving relevant code quality, and fixing relevant code for Admin View Orders, Admin View Products (Client + Server), Cart, and Payment features.
 - Foo Lin Xuan:
+  Write unit tests and fix relevant bugs for Protected Routes, Registration, Login, Admin View Users, Contact, Policy and General features.
 - Law Rui Xi:
 - Zhao Evan:
 
