@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       required: true,
-      min: 'Quantity cannot be negative'
+      min: [0, 'Quantity cannot be negative'],
     },
     photo: {
       data: Buffer,

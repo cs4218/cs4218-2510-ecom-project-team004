@@ -118,7 +118,7 @@ describe('Product Model Structure', () => {
 
   // Bug detection tests - schema validation rules
   describe('Schema Validation Rules', () => {
-    test('BUG: should have minimum value validation for price', () => {
+    test('should have minimum value validation for price', () => {
       const schema = Product.schema;
       const priceValidators = schema.path('price').validators;
       
@@ -127,7 +127,7 @@ describe('Product Model Structure', () => {
       expect(hasMinValidator).toBe(true);
     });
 
-    test('BUG: should have minimum value validation for quantity', () => {
+    test('should have minimum value validation for quantity', () => {
       const schema = Product.schema;
       const quantityValidators = schema.path('quantity').validators;
       
@@ -136,7 +136,7 @@ describe('Product Model Structure', () => {
       expect(hasMinValidator).toBe(true);
     });
 
-    test('BUG: should have unique constraint on slug', () => {
+    test('should have unique constraint on slug', () => {
       const schema = Product.schema;
       const slugPath = schema.path('slug');
       
