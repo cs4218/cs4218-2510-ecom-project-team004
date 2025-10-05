@@ -23,10 +23,12 @@ export default {
   testMatch: [
     "<rootDir>/client/src/components/*.test.js",
     "<rootDir>/client/src/components/Routes/*.test.js",
+    "<rootDir>/client/src/components/Form/*.test.js",
     "<rootDir>/client/src/pages/admin/*.test.js",
     "<rootDir>/client/src/pages/Auth/*.test.js",
     "<rootDir>/client/src/pages/user/*.test.js",
     "<rootDir>/client/src/pages/*.test.js",
+    "<rootDir>/client/src/context/*.test.js"
   ],
 
   // jest code coverage
@@ -40,7 +42,10 @@ export default {
     "client/src/pages/Contact.js",
     "client/src/pages/Pagenotfound.js",
     "client/src/pages/Policy.js",
-    "client/src/pages/user/**"
+    "client/src/pages/user/**",
+    "client/src/pages/Search.js",
+    "client/src/components/Form/SearchInput.js",
+    "client/src/context/search.js",
   ],
   coverageThreshold: {
     global: {
