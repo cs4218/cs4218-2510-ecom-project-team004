@@ -1,3 +1,5 @@
+// This test file was made with the help of an LLM
+
 import categoryModel from '../models/categoryModel.js';
 import {
   createCategoryController,
