@@ -316,4 +316,41 @@ describe("CreateCategory Component", () => {
     await waitFor(() => expect(axios.delete).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
   });
+
+  // This test was made with the help of an LLM
+  it("closes the edit modal when onCancel is triggered (clicking the close icon)", async () => {
+    axios.get.mockResolvedValueOnce({
+      data: { success: true, category: [{ _id: "1", name: "OldName" }] },
+    });
+
+    const { getByRole, findByRole, findByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(axios.get).toHaveBeenCalled());
+    expect(await findByText("OldName")).toBeInTheDocument();
+
+    const editBtn = getByRole("button", { name: "Edit" });
+    await act(async () => {
+      fireEvent.click(editBtn);
+    });
+
+    await findByRole("dialog");
+
+    const closeBtn = document.body.querySelector(".ant-modal-close");
+    expect(closeBtn).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.click(closeBtn);
+    });
+
+    await waitFor(() => {
+      const modalEl = document.body.querySelector(".ant-modal");
+      expect(modalEl).toBeTruthy();        
+      expect(modalEl).not.toBeVisible();
+      expect(modalEl).toHaveStyle({ display: "none" });
+    });
+  });
 });

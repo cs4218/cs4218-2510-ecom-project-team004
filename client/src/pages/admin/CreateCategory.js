@@ -6,9 +6,6 @@ import axios from "axios";
 import CategoryForm from "../../components/Form/CategoryForm";
 import { Modal } from "antd";
 
-// TODO: Fix updating with an empty string
-// TODO: Test cancel function (probably not necessary)
-
 const CreateCategory = () => {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");

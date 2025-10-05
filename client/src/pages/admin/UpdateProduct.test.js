@@ -1,6 +1,6 @@
 import UpdateProduct from "./UpdateProduct";
 import '@testing-library/jest-dom/extend-expect';
-import { render, waitFor, fireEvent } from "@testing-library/react";
+import { render, waitFor, fireEvent, within } from "@testing-library/react";
 import axios from "axios";
 import React from "react";
 import toast from 'react-hot-toast';
@@ -31,6 +31,31 @@ jest.mock("react-router-dom", () => {
         useParams: () => ({ slug: "prod-a" }),
     };
 });
+
+// This function was made with the help of an LLM
+async function selectAntdOptionByText(container, selectIndex, optionText) {
+    const selectors = container.querySelectorAll(".ant-select-selector");
+    const trigger = selectors[selectIndex];
+    if (!trigger) throw new Error(`Select index ${selectIndex} not found`);
+
+    await act(async () => {
+        fireEvent.mouseDown(trigger);
+    });
+
+    const listboxes = document.body.querySelectorAll(".ant-select-dropdown");
+    if (!listboxes.length) throw new Error("No AntD dropdown found");
+    const listbox = listboxes[listboxes.length - 1];
+    const { getByRole, getByText } = within(listbox);
+
+    const optionNode =
+        listbox.querySelector('[role="option"]') && getByText(optionText).closest('[role="option"]')
+            ? getByText(optionText).closest('[role="option"]')
+            : getByText(optionText);
+
+    await act(async () => {
+        fireEvent.click(optionNode);
+    });
+}
 
 describe("UpdateProduct component", () => {
     beforeEach(() => {
@@ -274,5 +299,166 @@ describe("UpdateProduct component", () => {
         await waitFor(() => {
             expect(toast.error).toHaveBeenCalledWith("Something wwent wrong in getting catgeory");
         });
+    });
+
+    it("shows the chosen filename on the upload button after selecting a photo", async () => {
+        axios.get
+            .mockResolvedValueOnce(productResp)
+            .mockResolvedValueOnce(categoriesResp);
+
+        const file = new File(["image-bytes"], "photo.png", { type: "image/png" });
+
+        const { container, findByText } = render(
+            <MemoryRouter>
+                <UpdateProduct />
+            </MemoryRouter>
+        );
+
+        const fileInput = await waitFor(() => container.querySelector('input[name="photo"]'));
+        await act(async () => {
+            fireEvent.change(fileInput, { target: { files: [file] } });
+        });
+
+        expect(await findByText("photo.png")).toBeInTheDocument();
+    });
+
+    it("handles update error (axios.put rejects) and shows toast.error", async () => {
+        axios.get
+            .mockResolvedValueOnce(productResp)
+            .mockResolvedValueOnce(categoriesResp);
+        axios.put.mockRejectedValueOnce(new Error("server down"));
+
+        const { getByText } = render(
+            <MemoryRouter>
+                <UpdateProduct />
+            </MemoryRouter>
+        );
+
+        const btn = await waitFor(() => getByText("UPDATE PRODUCT"));
+        await act(async () => {
+            fireEvent.click(btn);
+        });
+
+        expect(axios.put).toHaveBeenCalled();
+        expect(toast.error).toHaveBeenCalledWith("something went wrong");
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("handles delete error (axios.delete rejects) and shows toast.error", async () => {
+        axios.get
+            .mockResolvedValueOnce(productResp)
+            .mockResolvedValueOnce(categoriesResp);
+        axios.delete = jest.fn().mockRejectedValueOnce(new Error("oops"));
+        window.prompt.mockReturnValue("yes");
+
+        const { getByText, findByDisplayValue } = render(
+            <MemoryRouter>
+                <UpdateProduct />
+            </MemoryRouter>
+        );
+
+        await findByDisplayValue("prod-a");
+
+        const delBtn = await waitFor(() => getByText("DELETE PRODUCT"));
+        await act(async () => {
+            fireEvent.click(delBtn);
+        });
+
+        expect(axios.delete).toHaveBeenCalledWith("/api/v1/product/delete-product/pid");
+        expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("lets the user edit inputs and sends the new values in FormData", async () => {
+        axios.get
+            .mockResolvedValueOnce(productResp)
+            .mockResolvedValueOnce(categoriesResp);
+        axios.put.mockResolvedValueOnce({ data: { success: true } });
+
+        const { getByPlaceholderText, getByText } = render(
+            <MemoryRouter>
+                <UpdateProduct />
+            </MemoryRouter>
+        );
+
+        const nameInput = await waitFor(() => getByPlaceholderText("write a name"));
+        const descInput = getByPlaceholderText("write a description");
+        const priceInput = getByPlaceholderText("write a Price");
+        const qtyInput = getByPlaceholderText("write a quantity");
+
+        await act(async () => {
+            fireEvent.change(nameInput, { target: { value: "prod-a-edited" } });
+            fireEvent.change(descInput, { target: { value: "desc-edited" } });
+            fireEvent.change(priceInput, { target: { value: "99" } });
+            fireEvent.change(qtyInput, { target: { value: "7" } });
+        });
+
+        const btn = getByText("UPDATE PRODUCT");
+        await act(async () => {
+            fireEvent.click(btn);
+        });
+
+        const [, body] = axios.put.mock.calls[0];
+        expect(body.get("name")).toBe("prod-a-edited");
+        expect(body.get("description")).toBe("desc-edited");
+        expect(body.get("price")).toBe("99");
+        expect(body.get("quantity")).toBe("7");
+        expect(body.get("category")).toBe("1");
+        expect(body.get("shipping")).toBe("0");
+
+        expect(toast.success).toHaveBeenCalledWith("Product Updated Successfully");
+        expect(mockNavigate).toHaveBeenCalledWith("/dashboard/admin/products");
+    });
+
+    // This test was made with the help of an LLM
+    it("changes category via Select and sends the new category id", async () => {
+        const categoriesResp2 = {
+            data: { success: true, category: [{ _id: "1", name: "cat1" }, { _id: "2", name: "cat2" }] },
+        };
+
+        axios.get
+            .mockResolvedValueOnce(productResp)    // getSingleProduct
+            .mockResolvedValueOnce(categoriesResp2); // getAllCategory
+        axios.put.mockResolvedValueOnce({ data: { success: true } });
+
+        const { container, getByText } = render(
+            <MemoryRouter>
+                <UpdateProduct />
+            </MemoryRouter>
+        );
+
+        await selectAntdOptionByText(container, /*selectIndex=*/ 0, "cat2");
+
+        const btn = await waitFor(() => getByText("UPDATE PRODUCT"));
+        await act(async () => {
+            fireEvent.click(btn);
+        });
+
+        const [, body] = axios.put.mock.calls[0];
+        expect(body.get("category")).toBe("2");
+    });
+
+    // This test was made with the help of an LLM
+    it("changes shipping via Select and sends the new shipping value", async () => {
+        axios.get
+            .mockResolvedValueOnce(productResp) 
+            .mockResolvedValueOnce(categoriesResp);
+        axios.put.mockResolvedValueOnce({ data: { success: true } });
+
+        const { container, getByText } = render(
+            <MemoryRouter>
+                <UpdateProduct />
+            </MemoryRouter>
+        );
+
+        await selectAntdOptionByText(container, /*selectIndex=*/ 1, "Yes");
+
+        const btn = await waitFor(() => getByText("UPDATE PRODUCT"));
+        await act(async () => {
+            fireEvent.click(btn);
+        });
+
+        const [, body] = axios.put.mock.calls[0];
+        expect(body.get("shipping")).toBe("1"); // changed from "0" -> "1"
     });
 });
