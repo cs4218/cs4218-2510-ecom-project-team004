@@ -1,4 +1,4 @@
-import { forgotPasswordController, loginController, registerController, updateProfileController, getOrdersController, getAllOrdersController, orderStatusController } from "./authController";
+import { forgotPasswordController, loginController, registerController, updateProfileController, getOrdersController, getAllOrdersController, orderStatusController, testController } from "./authController";
 import userModel from "../models/userModel";
 import orderModel from "../models/orderModel";
 import { getMockReq, getMockRes } from "@jest-mock/express";
@@ -264,8 +264,6 @@ const userInfo = {
 }
 
 const { res } = getMockRes();
-console.log("RES!");
-console.log(res);
 
 // Mock mongoose methods in userModel
 const mockSave = jest.fn();
@@ -841,5 +839,35 @@ describe('Forgot Password Controller', () => {
       });
     });
 
+  })
+})
+
+describe('Test Controller', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  })
+
+ afterEach(() => {
+    jest.restoreAllMocks();
+  })
+
+  it('can send response', () => {
+    const req = {}
+    
+    testController(req, res);
+
+    expect(res.send).toHaveBeenCalledWith('Protected Routes');
+  })
+
+  // written with the help of AI to mock res.send to throw error
+  it('should handle error', () => {
+    const req = {}
+    res.send.mockImplementationOnce(() => { throw new Error('testError') });
+    const logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});
+    
+    testController(req, res);
+
+    expect(logSpy).toHaveBeenCalledWith(expect.any(Error));
+    expect(res.send).toHaveBeenCalledWith({ error: expect.any(Error) });
   })
 })
