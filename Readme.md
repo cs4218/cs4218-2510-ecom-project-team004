@@ -31,6 +31,8 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 
 ## 5. GitHub Workflow URL
 
+[GitHub Workflow](https://github.com/cs4218/cs4218-2510-ecom-project-team004/actions/runs/18255664528/job/51976561167)
+
 ## 6. Setting Up The Project
 
 ### 1. Installing Node.js
