@@ -28,7 +28,8 @@ export default {
     "<rootDir>/client/src/pages/Auth/*.test.js",
     "<rootDir>/client/src/pages/user/*.test.js",
     "<rootDir>/client/src/pages/*.test.js",
-    "<rootDir>/client/src/context/*.test.js"
+    "<rootDir>/client/src/context/*.test.js",
+    "<rootDir>/client/src/hooks/*.test.js",
   ],
 
   // jest code coverage
@@ -42,6 +43,7 @@ export default {
     "client/src/pages/**",
     "client/src/pages/user/**",
     "client/src/context/**",
+    "client/src/hooks",
   ],
   coverageThreshold: {
     global: {
