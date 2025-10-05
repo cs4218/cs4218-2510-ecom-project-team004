@@ -68,7 +68,7 @@ export const loginController = async (req, res) => {
     const { email, password } = req.body;
     //validation
     if (!email || !password) {
-      return res.status(401).send({
+      return res.status(404).send({
         success: false,
         message: "Invalid email or password",
       });
@@ -76,7 +76,7 @@ export const loginController = async (req, res) => {
     //check user
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(401).send({
+      return res.status(404).send({
         success: false,
         message: "Email is not registered",
       });
@@ -124,7 +124,7 @@ export const forgotPasswordController = async (req, res) => {
       res.status(400).send({ message: "Email is required" });
     }
     if (!answer) {
-      res.status(400).send({ message: "Answer is required" });
+      res.status(400).send({ message: "answer is required" });
     }
     if (!newPassword) {
       res.status(400).send({ message: "New Password is required" });
