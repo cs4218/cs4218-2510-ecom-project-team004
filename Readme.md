@@ -22,7 +22,13 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 **Milestone 1**
 - Baig Taemur: Added unit testing (with the help of GenAI) and fixed bugs. Files worked on: AdminMenu.js, AdminDashboard.js, CategoryForm.js, CreateCategory.js, CreateProduct.js, UpdateProduct.js, categoryController.js (within it: createCategoryController, updateCategoryController, deleteCategoryController, categoryController and singleCategoryController), useCategory.js, Categories.js and categoryModel.js.
 - Daphne Shaine Wilhelmina:
-  Adding test code for unit testing (with the help of GenAI), improving relevant code quality, and fixing relevant code for Admin View Orders, Admin View Products (Client + Server), Cart, and Payment features.
+  Adding test code for unit testing (with the help of GenAI), improving relevant code quality, and fixing relevant code for Admin View Orders, Admin View Products (Client + Server), Cart, and Payment features:
+  - pages/admin/AdminViewOrders.test.js for pages/admin/AdminOrders.js
+  - pages/admin/Products.test.js for pages/admin/Products.js 
+  - controllers/AdminViewProducts.test.js for controllers/productController.js: createProductController, deleteProductController, updateProductController
+  - context/cart.test.js for context/cart.js
+  - pages/CartPage.test.js for pages/CartPage.js
+  - controllers/Payment.test.js for controllers/productController.js: braintreeTokenController, brainTreePaymentController
 - Foo Lin Xuan:
   Write unit tests and fix relevant bugs for Protected Routes, Registration, Login, Admin View Users, Contact, Policy and General features.
 - Law Rui Xi: Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features.
