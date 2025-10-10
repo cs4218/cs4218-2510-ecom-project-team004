@@ -47,7 +47,21 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - pages/About.test.js for pages/About.js
   - pages/Pagenotfound.test.js for pages/Pagenotfound.js
   - config/db.test.js for config/db.js
-- Law Rui Xi: Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features.
+- Law Rui Xi: Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features. Specifically, added, modified or tested the following parts:
+  - General features:
+    - `components/Routes/Private.js`, `components/Routes/Private.test.js`
+    - `components/userMenu.js`, `components/userMenu.test.js`
+    - `pages/user/Dashboard.js`, `pages/user/Dashboard.test.js`
+    - `models/userModel.js`, `models/userModel.test.js`
+  - Order features:
+    - `pages/user/Order.js`, `pages/user/Order.test.js`
+    - `controllers/authController.js`, `controllers/authController.test.js`
+      - `updateProfileController`
+      - `getOrdersController`
+      - `getAllOrdersController`
+      - `orderStatusController`
+  - Profile features:
+    - `pages/user/Profile.js`, `pages/user/Profile.test.js`
 - Zhao Evan:
 
   #### Sprint 1 & 2
