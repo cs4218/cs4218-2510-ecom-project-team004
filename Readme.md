@@ -46,6 +46,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - components/Spinner.test.js for components/Spinner.js
   - pages/About.test.js for pages/About.js
   - pages/Pagenotfound.test.js for pages/Pagenotfound.js
+  - config/db.test.js for config/db.js
 - Law Rui Xi: Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features.
 - Zhao Evan:
 
