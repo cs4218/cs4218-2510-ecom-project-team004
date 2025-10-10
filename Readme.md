@@ -36,7 +36,16 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - pages/Auth/Register.test.js for pages/Auth/Register.js
   - pages/Auth/Login.test.js for pages/Auth/Login.js
   - controllers/authController.test.js for controllers/authController.js
-    - registerController, loginController, forgotPasswordController and testController 
+    - registerController, loginController, forgotPasswordController and testController
+  - pages/admin/Users.test.js for pages/admin/Users.js
+  - pages/Contact.test.js for pages/Contact.js
+  - pages/Policy.test.js for pages/Policy.js
+  - components/Footer.test.js for components/Footer.js
+  - components/Header.test.js for components/Header.js
+  - components/Layout.test.js for components/Layout.js
+  - components/Spinner.test.js for components/Spinner.js
+  - pages/About.test.js for pages/About.js
+  - pages/Pagenotfound.test.js for pages/Pagenotfound.js
 - Law Rui Xi: Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features.
 - Zhao Evan:
 
