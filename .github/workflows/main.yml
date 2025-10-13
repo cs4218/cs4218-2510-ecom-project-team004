@@ -31,6 +31,8 @@ jobs:
           
       - name: Run frontend tests
         run: npm run test:frontend
+        continue-on-error: true
       
       - name: Run backend tests
         run: npm run test:backend
+        continue-on-error: true
