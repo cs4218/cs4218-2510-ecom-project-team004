@@ -49,7 +49,7 @@ describe("Admins can view and update orders.", () => {
         expect(res.statusCode).toBe(401);
     })
 
-    test("Should allow admin to view all orders", async () => {
+    test("Should allow admin to view all orders, view specific order, and edit specific order", async () => {
         const order = await orderModel.create({
             products: [],
             payment: {},
@@ -57,7 +57,23 @@ describe("Admins can view and update orders.", () => {
             status: "Not Process"
         })
 
-        const res = await request(app).get("/api/v1/auth/all-orders").set("Authorization", `${adminToken}`);
+        let res = await request(app).get("/api/v1/auth/all-orders").set("Authorization", `${adminToken}`);
         expect(res.statusCode).toBe(200);
+
+        res = await request(app).get("/api/v1/auth/orders").set("Authorization", `${adminToken}`).send({
+            user: { _id: normal_user._id }
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].buyer._id).toEqual(normal_user._id.toString());
+        expect(res.body[0].status).toBe("Not Process");
+
+        res = await request(app).put(`/api/v1/auth/order-status/${order._id}`).set("Authorization", `${adminToken}`).send({
+            status: "Shipped"
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toBeDefined();
+        expect(res.body.status).toBe("Shipped");
     })
 })
