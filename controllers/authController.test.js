@@ -470,8 +470,8 @@ describe('Login Controller', () => {
   
       await loginController(req, res);
   
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Invalid email or password' });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Email and password are required' });
     });
   
     it('should send message when password is empty', async () => {
@@ -481,8 +481,8 @@ describe('Login Controller', () => {
   
       await loginController(req, res);
   
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Invalid email or password' });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Email and password are required' });
     });
   
   })
