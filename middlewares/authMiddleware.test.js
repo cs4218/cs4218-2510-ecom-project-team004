@@ -40,6 +40,8 @@ describe('Require Sign In', () => {
         expect(req).not.toHaveProperty('user');        // should not have user info
         expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
         expect(logSpy).toHaveBeenCalledWith('Error verifying token');
+        expect(res.status).toHaveBeenCalledTimes(1);  
+        expect(res.send).toHaveBeenCalledTimes(1);
         expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ 
             success: false, 
@@ -79,6 +81,8 @@ describe('Is Admin', () => {
 
         expect(userModel.findById).toHaveBeenCalledTimes(1);    // should check user
         expect(userModel.findById).toHaveBeenCalledWith('fakeId');
+        expect(res.status).toHaveBeenCalledTimes(1);  
+        expect(res.send).toHaveBeenCalledTimes(1);
         expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Unauthorized Access' });
     });
@@ -95,6 +99,8 @@ describe('Is Admin', () => {
         expect(userModel.findById).toHaveBeenCalledWith('fakeId');
         expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
         expect(logSpy).toHaveBeenCalledWith('Error when checking user');
+        expect(res.status).toHaveBeenCalledTimes(1);  
+        expect(res.send).toHaveBeenCalledTimes(1);
         expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ 
             success: false, 
