@@ -542,10 +542,10 @@ describe('Login Controller', () => {
       await loginController(req, res);
   
       expect(userModel.findOne).toHaveBeenCalledWith({ email: userInfo.email });
-      expect(res.status).toHaveBeenCalledWith(404); 
+      expect(res.status).toHaveBeenCalledWith(401); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
-        message: 'Email is not registered',
+        message: 'Invalid email or password',
         });
     });
   
@@ -567,7 +567,7 @@ describe('Login Controller', () => {
       expect(res.status).toHaveBeenCalledWith(401); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
-        message: 'Invalid Password',
+        message: 'Invalid email or password',
         });
     });
   
