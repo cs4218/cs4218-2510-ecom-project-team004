@@ -120,10 +120,26 @@ const CartPage = () => {
       console.log("Error fetching payment token:", error);
     }
   };
-
+  // The code below is modified to fix one of the error/warning that appeared during cart management integration tests.
+  // The cause of error/warning was that the token fetching was being triggered even when the cart was empty or user was not authenticated.
+  // Fetch Braintree client token only when authenticated and cart has items
   useEffect(() => {
-    getToken();
-  }, [auth?.token]);
+    if (!auth?.token || mergedCart.length === 0) return;
+
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await axios.get("/api/v1/product/braintree/token");
+        if (mounted) setClientToken(data?.clientToken || "");
+      } catch (error) {
+        console.log("Error fetching payment token:", error);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [auth?.token, mergedCart.length]);
 
   // Handle payments
   const handlePayment = async () => {
