@@ -7,6 +7,8 @@ import slugify from "slugify";
 import braintree from "braintree";
 import dotenv from "dotenv";
 
+import mongoose from 'mongoose'; // ADDED2
+
 dotenv.config();
 
 // Braintree Gateway Configuration
@@ -138,7 +140,19 @@ export const getSingleProductController = async (req, res) => {
 // get photo
 export const productPhotoController = async (req, res) => {
   try {
+    // ADDED2 
+    // NOTE: Had help from an LLM
+    // Validate ObjectId format
+    const { pid } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).send({
+        success: false,
+        message: 'Invalid product ID format',
+      });
+    }
+
     const product = await productModel.findById(req.params.pid).select("photo");
+
 
     // FIXED: Added  
     // NOTE: Had help from an LLM
@@ -324,11 +338,15 @@ export const productListController = async (req, res) => {
 
     // FIXED: Consistent default handling using parseInt()
     // NOTE: Had help from an LLM
-    const page = parseInt(req.params.page) || 1;
+    //const page = parseInt(req.params.page) || 1;
+    // ADDED2
+    const rawPage = req.params.page;
+    const page = parseInt(rawPage, 10);
+
 
     // FIXED: Validate page number (reject negative/zero)
     // NOTE: Had help from an LLM
-    if (page < 1) {
+    if (!rawPage || isNaN(page) || page < 1) { // ADDED2: !rawPage || isNaN(page)
       return res.status(400).send({
         success: false,
         message: "Invalid page number",
