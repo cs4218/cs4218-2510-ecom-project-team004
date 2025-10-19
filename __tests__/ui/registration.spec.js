@@ -14,22 +14,23 @@ test.afterAll(async () => {
 });
 
 test.beforeEach(async ({ page }) => {
-    await page.goto('localhost:3000/');
-    await page.getByRole('link', { name: 'Register' }).click();
+  await page.goto('http://localhost:3000/');
+  await page.evaluate(() => localStorage.clear()); // To ensure auth state is cleared
+  await page.getByRole('link', { name: 'Register' }).click();
 })
 
 test.afterEach(async () => {
-    await userModel.deleteOne({ email: testUser.email });
+  await userModel.deleteOne({ email: testUser.email });
 })
 
 const testUser = {
-    name: 'John Doe',
-    email: 'test@example.com',
-    password: 'password123',
-    phone: '1234567890',
-    address: '123 Street',
-    DOB: '2000-01-01',
-    answer: 'Football',
+  name: 'John Doe',
+  email: 'test@example.com',
+  password: 'password123',
+  phone: '1234567890',
+  address: '123 Street',
+  DOB: '2000-01-01',
+  answer: 'Football',
 }
 
 test('has title', async ({ page }) => {
@@ -65,10 +66,10 @@ test('should allow me to register', async ({ page }) => {
   await page.getByRole('textbox', { name: 'What is Your Favorite sports' }).fill(testUser.answer);
   await page.getByRole('button', { name: 'REGISTER' }).click();
   await expect(page.getByText('Register Successfully, please login')).toBeVisible();
-  expect(page).toHaveURL('http://localhost:3000/login');
+  await expect(page).toHaveURL('http://localhost:3000/login');
 });
 
-// Precondition: Email has already been registered in the database
+// Precondition: Email must be pre-registered in the database
 test('should not allow multiple registration with same email', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Enter Your Name' }).click();
   await page.getByRole('textbox', { name: 'Enter Your Name' }).fill(testUser.name);
