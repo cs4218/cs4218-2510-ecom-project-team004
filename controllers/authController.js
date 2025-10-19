@@ -206,7 +206,7 @@ export const updateProfileController = async (req, res) => {
 export const getOrdersController = async (req, res) => {
   try {
     const orders = await orderModel
-      .find({ buyer: req.body.user._id })
+      .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name");
     res.json(orders);
