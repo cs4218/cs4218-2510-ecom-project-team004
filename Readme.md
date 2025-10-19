@@ -64,8 +64,16 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
     - `pages/user/Profile.js`, `pages/user/Profile.test.js`
 - Zhao Evan:
 
-  #### Sprint 1 & 2
-  I wrote unit tests and fixed issues for - Product Feature (ProductDetails.js, CategoryProduct.js, productModel.js, productController.js [getProduct, getSingleProduct, productPhoto, productFilters, productCount, productList, searchProduct, realtedProduct, productCategory]), and Search Feature (SearchInput.js, search.js, Search.js), Home Feature (HomePage.js). 
+  I wrote unit tests and fixed issues for - Product Feature (ProductDetails.js, CategoryProduct.js, productModel.js, productController.js [getProduct, getSingleProduct, productPhoto, productFilters, productCount, productList, searchProduct, realtedProduct, productCategory]), and Search Feature (SearchInput.js, search.js, Search.js), Home Feature (HomePage.js).
+
+**Milestone 2**
+- 
+-
+-
+-
+- Zhao Evan:
+  I wrote integration tests and fixed issues for - Product Feature (see __tests__/integration/ productModel.integration.test, productController.integration.test.js, productRoutes.integration.test.js), Search Feature (see client/__tests__/ context-search.integration.test.js, SearchInput.integration.test.js, page-search.integration.test.js), Home Feature (see client/__tests__/HomePage.integration.test.js).
+  I also wrote UI tests for Home Page Browsing, Category Page Browsing Product Details Browsing, Search Browsing.
 
 ## 5. GitHub Workflow URL
 
