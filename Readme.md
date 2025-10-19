@@ -20,9 +20,9 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 
 ## 4. Members Scope
 ### Milestone 1
-- Baig Taemur:
+- **Baig Taemur:**
   Added unit testing (with the help of GenAI) and fixed bugs. Files worked on: AdminMenu.js, AdminDashboard.js, CategoryForm.js, CreateCategory.js, CreateProduct.js, UpdateProduct.js, categoryController.js (within it: createCategoryController, updateCategoryController, deleteCategoryController, categoryController and singleCategoryController), useCategory.js, Categories.js and categoryModel.js.
-- Daphne Shaine Wilhelmina:
+- **Daphne Shaine Wilhelmina:**
   Adding test code for unit testing (with the help of GenAI), improving relevant code quality, and fixing relevant code for Admin View Orders, Admin View Products (Client + Server), Cart, and Payment features:
   - pages/admin/AdminViewOrders.test.js for pages/admin/AdminOrders.js
   - pages/admin/Products.test.js for pages/admin/Products.js 
@@ -30,7 +30,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - context/cart.test.js for context/cart.js
   - pages/CartPage.test.js for pages/CartPage.js
   - controllers/Payment.test.js for controllers/productController.js: braintreeTokenController, brainTreePaymentController
-- Foo Lin Xuan:
+- **Foo Lin Xuan:**
   Write unit tests and fix relevant bugs for Protected Routes, Registration, Login, Admin View Users, Contact, Policy and General features.
   - helpers/authHelper.test.js for helpers/authHelper.js
   - middlewares/authMiddleware.test.js for middlewares/authMiddleware.js
@@ -48,7 +48,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - pages/About.test.js for pages/About.js
   - pages/Pagenotfound.test.js for pages/Pagenotfound.js
   - config/db.test.js for config/db.js
-- Law Rui Xi:
+- **Law Rui Xi:**
   Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features. Specifically, added, modified or tested the following parts:
   - General features:
     - `components/Routes/Private.js`, `components/Routes/Private.test.js`
@@ -64,7 +64,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
       - `orderStatusController`
   - Profile features:
     - `pages/user/Profile.js`, `pages/user/Profile.test.js`
-- Zhao Evan:
+- **Zhao Evan:**
   I wrote unit tests and fixed issues for - Product Feature (ProductDetails.js, CategoryProduct.js, productModel.js, productController.js [getProduct, getSingleProduct, productPhoto, productFilters, productCount, productList, searchProduct, realtedProduct, productCategory]), and Search Feature (SearchInput.js, search.js, Search.js), Home Feature (HomePage.js).
 
 ### Milestone 2
@@ -72,7 +72,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 -
 -
 -
-- Zhao Evan:
+- **Zhao Evan:**
   I wrote integration tests and fixed issues for - Product Feature (see __tests__/integration/ productModel.integration.test, productController.integration.test.js, productRoutes.integration.test.js), Search Feature (see client/__tests__/ context-search.integration.test.js, SearchInput.integration.test.js, page-search.integration.test.js), Home Feature (see client/__tests__/HomePage.integration.test.js).
   I also wrote UI tests for Home Page Browsing, Category Page Browsing Product Details Browsing, Search Browsing.
 
