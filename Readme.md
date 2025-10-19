@@ -70,7 +70,17 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 ### Milestone 2
 - 
 -
--
+- **Foo Lin Xuan:**
+  Write integration, UI tests and fix relevant bugs for Registration, Login, Protected Routes, Admin View Users and Page Layout features.
+  | Feature | Integration Test File | UI Tests File |
+  | - | - | - |
+  | Registration | `registration.test.js` | `registration.spec.js` |
+  | Login | `login.test.js` | `login.spec.js` |
+  | Protected Routes | `protectedRoutes.test.js` | `protectedRoutes.spec.js` |
+  | Admin View Users | - | `adminViewUsers.spec.js` |
+  | Page Layout | - | `pageLayout.spec.js` |
+
+  All integration and UI test files are in `__tests__/integration` and `__tests__/ui` directories respectively.
 -
 - **Zhao Evan:**
   I wrote integration tests and fixed issues for - Product Feature (see __tests__/integration/ productModel.integration.test, productController.integration.test.js, productRoutes.integration.test.js), Search Feature (see client/__tests__/ context-search.integration.test.js, SearchInput.integration.test.js, page-search.integration.test.js), Home Feature (see client/__tests__/HomePage.integration.test.js).
