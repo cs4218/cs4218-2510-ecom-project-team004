@@ -1,6 +1,6 @@
 /**
  * Braintree Payment API
- * The tests below are generated with help from GenAI
+ * The tests below are generated with help from GenAI.
  */
 
 import express from "express";
@@ -10,9 +10,9 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import braintree from "braintree";
 
-import productModel from "../../models/productModel.js";
-import orderModel from "../../models/orderModel.js";
-import productRoutes from "../../routes/productRoutes.js";
+import productModel from "../../../models/productModel.js";
+import orderModel from "../../../models/orderModel.js";
+import productRoutes from "../../../routes/productRoutes.js";
 
 jest.mock("braintree", () => {
   const mockGenerate = jest.fn();
@@ -29,7 +29,7 @@ jest.mock("braintree", () => {
   };
 });
 
-jest.mock("../../middlewares/authMiddleware.js", () => {
+jest.mock("../../../middlewares/authMiddleware.js", () => {
   const testUserId = "64f123abc456def789012345";
   return {
     requireSignIn: (req, res, next) => {
