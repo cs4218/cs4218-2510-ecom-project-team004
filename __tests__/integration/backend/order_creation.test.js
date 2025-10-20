@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import { hashPassword } from "../../helpers/authHelper";
+import { hashPassword } from "../../../helpers/authHelper.js";
 import request from "supertest";
-import userModel from "../../models/userModel";
-import productModel from "../../models/productModel";
-import categoryModel from "../../models/categoryModel";
-import app from "../../server.js";
+import userModel from "../../../models/userModel.js";
+import productModel from "../../../models/productModel.js";
+import categoryModel from "../../../models/categoryModel.js";
+import app from "../../../server.js";
 import {BraintreeGateway, Environment} from "braintree";
 import braintree from "braintree";
 
