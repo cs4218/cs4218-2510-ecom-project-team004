@@ -59,6 +59,7 @@
     "msw": "^2.11.5",
     "sonarqube-scanner": "^3.3.0",
     "supertest": "^7.1.4",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "whatwg-fetch": "^3.6.20"
   }
 }

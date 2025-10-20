@@ -1,6 +1,6 @@
 // The code below is modified to fix the cart context to properly handle cart data migration between guest and authenticated users.
 // The previous implementation didn't handle the cart context correctly when transition between guest and authenticated user, leading to incorrect cart data persistence (Milestone 1: Unit Tests).
-// The fix below is helped with GenAI suggestions.
+// The changes below is helped with GenAI suggestions.
 import React, {
   useState,
   useContext,
@@ -54,7 +54,6 @@ const CartProvider = ({ children }) => {
       }
 
       setCart(sanitized);
-      localStorage.setItem(storageKey, JSON.stringify(sanitized));
     } catch (e) {
       console.error("Invalid cart JSON, resetting cart to empty", e);
       setCart([]);
@@ -75,6 +74,15 @@ const CartProvider = ({ children }) => {
   );
 };
 
+function isValidCartItem(item) {
+  return (
+    item &&
+    typeof item._id === "string" &&
+    typeof item.name === "string" &&
+    (typeof item.price === "number" || typeof item.price === "string")
+  );
+}
+
 function validateCartData(rawData) {
   if (!Array.isArray(rawData)) {
     console.warn("Cart data is not an array. Resetting to empty.");
@@ -83,12 +91,7 @@ function validateCartData(rawData) {
 
   const result = [];
   for (const item of rawData) {
-    if (
-      item &&
-      typeof item._id === "string" &&
-      typeof item.name === "string" &&
-      (typeof item.price === "number" || typeof item.price === "string")
-    ) {
+    if (isValidCartItem(item)) {
       const priceNum =
         typeof item.price === "number" ? item.price : Number(item.price);
       if (Number.isNaN(priceNum)) {

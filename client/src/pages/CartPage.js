@@ -12,7 +12,7 @@ const CartPage = () => {
   const [auth] = useAuth();
   const [cart, setCart] = useCart();
   const [clientToken, setClientToken] = useState("");
-  const [instance, setInstance] = useState("");
+  const [instance, setInstance] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -94,6 +94,13 @@ const CartPage = () => {
     }
   }, [mergedCart]);
 
+  // Total units (after merge)
+  const totalUnits = useMemo(
+    () =>
+      mergedCart.reduce((sum, item) => sum + Number(item.userQuantity || 0), 0),
+    [mergedCart]
+  );
+
   // Remove one item at a time
   const removeCartItem = (pid) => {
     try {
@@ -104,22 +111,12 @@ const CartPage = () => {
         updatedCart.splice(index, 1);
 
         setCart(updatedCart);
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
       }
     } catch (error) {
       console.error("Error removing item:", error);
     }
   };
 
-  // Get payment gateway token
-  const getToken = async () => {
-    try {
-      const { data } = await axios.get("/api/v1/product/braintree/token");
-      setClientToken(data?.clientToken);
-    } catch (error) {
-      console.log("Error fetching payment token:", error);
-    }
-  };
   // The code below is modified to fix one of the error/warning that appeared during cart management integration tests.
   // The cause of error/warning was that the token fetching was being triggered even when the cart was empty or user was not authenticated.
   // Fetch Braintree client token only when authenticated and cart has items
@@ -144,14 +141,41 @@ const CartPage = () => {
   // Handle payments
   const handlePayment = async () => {
     try {
+      if (!instance) return;
       setLoading(true);
       const { nonce } = await instance.requestPaymentMethod();
-      await axios.post("/api/v1/product/braintree/payment", {
-        nonce,
-        cart: mergedCart,
-      });
+
+      const useV2 =
+        String(process.env.REACT_APP_PAYMENT_API_VERSION).toLowerCase() ===
+        "v2";
+
+      let payloadCart;
+      if (useV2) {
+        // V2: grouped line items with quantity
+        payloadCart = mergedCart.map((i) => ({
+          _id: i._id,
+          name: i.name,
+          price: Number(i.price),
+          quantity: Number(i.userQuantity || 1),
+        }));
+      } else {
+        // V1: flat list with one entry per unit
+        payloadCart = mergedCart.flatMap((i) => {
+          const qty = Number(i.userQuantity || 1);
+          return Array.from({ length: qty }, () => ({
+            _id: i._id,
+            name: i.name,
+            price: Number(i.price),
+          }));
+        });
+      }
+
+      const paymentUrl = useV2
+        ? "/api/v1/product/braintree/payment-v2"
+        : "/api/v1/product/braintree/payment";
+
+      await axios.post(paymentUrl, { nonce, cart: payloadCart });
       setLoading(false);
-      localStorage.removeItem("cart");
       setCart([]);
       navigate("/dashboard/user/orders");
       toast.success("Payment Completed Successfully ");
@@ -177,7 +201,7 @@ const CartPage = () => {
                       const loginMessage = auth?.token
                         ? ""
                         : "Please login to checkout!";
-                      return `You Have ${cart.length} total items ${loginMessage}`;
+                      return `You Have ${totalUnits} total items ${loginMessage}`;
                     })()
                   : "Your Cart Is Empty"}
               </p>

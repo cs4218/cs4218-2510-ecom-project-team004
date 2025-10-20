@@ -1,12 +1,31 @@
 /**
  * Cart and Checkout Integration
- * The tests below are generated with help of GenAI
+ * The tests below are generated with help of GenAI.
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { RouterProvider, createMemoryRouter } from "react-router-dom";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+  act,
+} from "@testing-library/react";
+import { RouterProvider, createMemoryRouter, Outlet } from "react-router-dom";
 import axios from "axios";
+
+// Polyfill fetch/Request/Response/Headers for router navigation in tests
+import "whatwg-fetch";
+if (!globalThis.Request || !globalThis.Response || !globalThis.Headers) {
+  // whatwg-fetch attaches these globals on import; this is just a safety check
+  // eslint-disable-next-line no-undef
+  globalThis.Request = globalThis.Request || Request;
+  // eslint-disable-next-line no-undef
+  globalThis.Response = globalThis.Response || Response;
+  // eslint-disable-next-line no-undef
+  globalThis.Headers = globalThis.Headers || Headers;
+}
 
 // matchMedia polyfill
 if (globalThis.window !== undefined && !globalThis.window.matchMedia) {
@@ -119,6 +138,7 @@ const CartPage = require("../../../client/src/pages/CartPage").default;
 const { CartProvider, useCart } = require("../../../client/src/context/cart");
 const { SearchProvider } = require("../../../client/src/context/search");
 const { AuthProvider } = require("../../../client/src/context/auth");
+const Orders = require("../../../client/src/pages/user/Orders").default;
 
 // Silence router warnings
 let originalWarn;
@@ -187,6 +207,40 @@ const renderWithProviders = (ui) => {
     }
   );
   return render(<RouterProvider router={router} />);
+};
+
+// Helper to render CartPage at "/" and Orders at "/dashboard/user/orders"
+const renderCartAndOrdersApp = () => {
+  const router = createMemoryRouter(
+    [
+      {
+        path: "/",
+        element: (
+          <SearchProvider>
+            <AuthProvider>
+              <CartProvider>
+                <div data-testid="app-root">
+                  <Outlet />
+                </div>
+              </CartProvider>
+            </AuthProvider>
+          </SearchProvider>
+        ),
+        children: [
+          { path: "/", element: <CartPage /> },
+          { path: "/dashboard/user/orders", element: <Orders /> },
+        ],
+      },
+    ],
+    {
+      initialEntries: ["/"],
+      future: {
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      },
+    }
+  );
+  return { ...render(<RouterProvider router={router} />), router };
 };
 
 // Tests
@@ -380,5 +434,122 @@ describe("Cart and Checkout Integration", () => {
       expect(screen.getByText(/Your cart is empty/i)).toBeInTheDocument()
     );
     expect(localStorage.getItem(activeCartKey())).toBe(JSON.stringify([]));
+  });
+
+  test("orders page shows per-line quantities matching merged cart after successful checkout", async () => {
+    // Logged-in user with address so Make Payment is enabled
+    const user = { _id: "u-qc", name: "Quant User", address: "123 Main" };
+    globalThis.__authMock = { token: "tok", user };
+
+    // Cart has duplicates that should merge into quantities: p1 x2, p2 x1
+    const p1 = {
+      _id: "p1",
+      name: "P1",
+      price: 10,
+      quantity: 1,
+      description: "d1",
+    };
+    const p2 = {
+      _id: "p2",
+      name: "P2",
+      price: 5,
+      quantity: 1,
+      description: "d2",
+    };
+    localStorage.setItem(`cart:${user._id}`, JSON.stringify([p1, p1, p2]));
+
+    // Mock axios calls in order:
+    // 1) Braintree token fetch
+    // 2) Orders fetch (after we navigate to /dashboard/user/orders)
+    axios.get.mockImplementationOnce((url) => {
+      expect(url).toBe("/api/v1/product/braintree/token");
+      return Promise.resolve({ data: { clientToken: "fake-token" } });
+    });
+    axios.get.mockImplementationOnce((url) => {
+      expect(url).toBe("/api/v1/auth/orders");
+      // API returns normalized line items and summary
+      return Promise.resolve({
+        data: [
+          {
+            _id: "order-1",
+            status: "Not Process",
+            buyer: { name: user.name },
+            createdAt: new Date().toISOString(),
+            payment: { success: true },
+            products: [
+              {
+                product: {
+                  _id: "p1",
+                  name: "P1",
+                  description: "d1",
+                  price: 10,
+                },
+                quantity: 2,
+                price: 10,
+              },
+              {
+                product: { _id: "p2", name: "P2", description: "d2", price: 5 },
+                quantity: 1,
+                price: 5,
+              },
+            ],
+            summary: { totalUnits: 3, totalAmount: 25 },
+          },
+        ],
+      });
+    });
+
+    // Payment resolves successfully
+    axios.post.mockResolvedValueOnce({
+      data: { ok: true, orderId: "order-1" },
+    });
+
+    // Render app with both routes
+    const { router } = renderCartAndOrdersApp();
+
+    // DropIn renders after token fetch
+    await screen.findByTestId("dropin-mock");
+
+    // CartPage header reflects merged total units (3)
+    await waitFor(() =>
+      expect(
+        screen.getByText(/You Have\s*3\s*total items/i)
+      ).toBeInTheDocument()
+    );
+
+    // Pay
+    const payBtn = await screen.findByRole("button", { name: /make payment/i });
+    expect(payBtn).toBeEnabled();
+    fireEvent.click(payBtn);
+
+    // Backend was called
+    await waitFor(() =>
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/product/braintree/payment",
+        expect.objectContaining({
+          nonce: "fake-nonce",
+          cart: expect.any(Array),
+        })
+      )
+    );
+
+    // Manually navigate to Orders (wrap in act to avoid warnings)
+    await act(async () => {
+      await router.navigate("/dashboard/user/orders");
+    });
+
+    // Orders page shows per-line quantities consistent with merged cart
+    await waitFor(() =>
+      expect(screen.getByText(/All Orders/i)).toBeInTheDocument()
+    );
+
+    // Verify quantities for each line
+    expect(screen.getByText(/Quantity:\s*2/i)).toBeInTheDocument(); // P1 x2
+    expect(screen.getByText(/Quantity:\s*1/i)).toBeInTheDocument(); // P2 x1
+
+    // Optional: verify buyer name and payment status appear within the orders table
+    const [ordersTable] = screen.getAllByRole("table");
+    expect(within(ordersTable).getByText(user.name)).toBeInTheDocument();
+    expect(within(ordersTable).getByText(/Success/i)).toBeInTheDocument();
   });
 });
