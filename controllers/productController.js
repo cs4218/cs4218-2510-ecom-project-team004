@@ -1,6 +1,7 @@
 import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
 import orderModel from "../models/orderModel.js";
+import orderV2Model from "../models/orderV2Model.js";
 
 import fs from "fs";
 import slugify from "slugify";
@@ -90,7 +91,7 @@ export const getProductController = async (req, res) => {
     res.status(200).send({
       success: true,
       countTotal: products.length, // FIXED: counTotal --> countTotal
-      message: "All Products",  // FIXED: ALlProducts --> AllProducts
+      message: "All Products", // FIXED: ALlProducts --> AllProducts
       products,
     });
   } catch (error) {
@@ -110,7 +111,7 @@ export const getSingleProductController = async (req, res) => {
       .select("-photo")
       .populate("category");
 
-    // FIXED: Added  
+    // FIXED: Added
     // NOTE: Had help from an LLM
     // Check if product exists
     if (!product) {
@@ -129,7 +130,7 @@ export const getSingleProductController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error while getting single product", // FIXED: Eror while getitng single product --> Error while getting single product 
+      message: "Error while getting single product", // FIXED: Eror while getitng single product --> Error while getting single product
       error,
     });
   }
@@ -140,7 +141,7 @@ export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
 
-    // FIXED: Added  
+    // FIXED: Added
     // NOTE: Had help from an LLM
     // Check if product exists
     if (!product) {
@@ -263,7 +264,8 @@ export const productFiltersController = async (req, res) => {
     const radio = Array.isArray(body.radio) ? body.radio : [];
 
     let args = {};
-    if (Array.isArray(checked) && checked.length > 0) args.category = { $in: checked }; // FIXED: checked --> { $in: checked } AND added "Array.isArray(checked) &&"   NOTE: Had help from an LLM
+    if (Array.isArray(checked) && checked.length > 0)
+      args.category = { $in: checked }; // FIXED: checked --> { $in: checked } AND added "Array.isArray(checked) &&"   NOTE: Had help from an LLM
     // if (radio.length >= 2) args.price = { $gte: radio[0], $lte: radio[1] }; // FIXED: Added "radio.length >= 2"
 
     // FIXED: Added radio validation
@@ -271,8 +273,8 @@ export const productFiltersController = async (req, res) => {
     if (Array.isArray(radio) && radio.length >= 2) {
       const [minPrice, maxPrice] = radio;
       if (
-        typeof minPrice === 'number' &&
-        typeof maxPrice === 'number' &&
+        typeof minPrice === "number" &&
+        typeof maxPrice === "number" &&
         !isNaN(minPrice) &&
         !isNaN(maxPrice) &&
         isFinite(minPrice) &&
@@ -348,9 +350,9 @@ export const productListController = async (req, res) => {
     res.status(200).send({
       success: true,
       products,
-      currentPage: page,                      // Current page number - ADDED
+      currentPage: page, // Current page number - ADDED
       totalPages: Math.ceil(total / perPage), // Total pages available - ADDED
-      totalProducts: total,                   // Total product count - ADDED
+      totalProducts: total, // Total product count - ADDED
     });
   } catch (error) {
     console.log(error);
@@ -386,7 +388,8 @@ export const searchProductController = async (req, res) => {
 };
 
 // similar products ----------------------------------------------- Think this has no bugs?
-export const realtedProductController = async (req, res) => {  // TYPO CAUSING BUG??? - Maybe leave for integration testing...
+export const realtedProductController = async (req, res) => {
+  // TYPO CAUSING BUG??? - Maybe leave for integration testing...
   try {
     const { pid, cid } = req.params;
     const products = await productModel
@@ -403,7 +406,8 @@ export const realtedProductController = async (req, res) => {  // TYPO CAUSING B
     });
   } catch (error) {
     console.log(error);
-    res.status(400).send({ // For all these, I believe 500 error is better for server side?... But this just a design choice, not bug?
+    res.status(400).send({
+      // For all these, I believe 500 error is better for server side?... But this just a design choice, not bug?
       success: false,
       message: "Error while getting related product",
       error, // And for all these, not safe to send the error object, just the message instead?... But this just a design choice, not bug?
@@ -427,7 +431,9 @@ export const productCategoryController = async (req, res) => {
 
     // FIXED: Pass only the _id
     // const products = await productModel.find({ category }).populate("category");
-    const products = await productModel.find({ category: category._id }).populate("category");
+    const products = await productModel
+      .find({ category: category._id })
+      .populate("category");
 
     res.status(200).send({
       success: true,
@@ -468,55 +474,51 @@ export const brainTreePaymentController = async (req, res) => {
     const { nonce, cart } = req.body;
 
     // Validate cart existence and non-empty
-    if (!cart || cart.length === 0)
+    if (!Array.isArray(cart) || cart.length === 0) {
       return res.status(400).send({ error: "Cart cannot be empty" });
+    }
 
     // Validate nonce
     if (!nonce || typeof nonce !== "string" || nonce.trim() === "") {
       return res.status(400).send({ error: "Payment nonce required" });
     }
 
-    // Validate each price in the cart
+    // Validate and compute total from price (cart is flat list of units in V1)
+    let total = 0;
     for (const item of cart) {
-      const price = Number(item.price);
-
-      // Must be a valid number and non-negative
-      if (isNaN(price) || price < 0) {
+      const price = Number(item?.price);
+      if (!Number.isFinite(price) || price < 0) {
         return res.status(400).send({ error: "Invalid price in cart" });
       }
+      total += price;
     }
 
-    // Calculate total amount
-    const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
-    // Round to 2 decimal places to avoid floating point issues
-    const roundedTotal = Math.round((total + Number.EPSILON) * 100) / 100;
-    // Convert to string with 2 decimal places (Braintree requirement)
-    const amountAsString = roundedTotal.toFixed(2);
+    const amountAsString = (
+      Math.round((total + Number.EPSILON) * 100) / 100
+    ).toFixed(2);
 
-    // Call Braintree API to process payment
+    // Braintree sale
     gateway.transaction.sale(
       {
         amount: amountAsString,
         paymentMethodNonce: nonce,
-        options: {
-          submitForSettlement: true,
-        },
+        options: { submitForSettlement: true },
       },
       async (error, result) => {
         if (error) {
           return res.status(500).send({ error: error.message });
         }
-
-        if (!result.success) {
-          return res.status(500).send({
-            error: "Transaction failed",
-            details: result,
-          });
+        if (!result?.success) {
+          return res
+            .status(500)
+            .send({ error: "Transaction failed", details: result });
         }
 
         try {
+          const productIds = cart.map((i) => i._id);
+
           await new orderModel({
-            products: cart,
+            products: productIds,
             payment: result,
             buyer: req.user._id,
           }).save();
@@ -531,5 +533,87 @@ export const brainTreePaymentController = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+// Process Payment V2 for the fixes of showing correct quantity and item cards in order when duplicate items are in cart.
+export const brainTreePaymentV2Controller = async (req, res) => {
+  try {
+    const { nonce, cart } = req.body;
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).send({ error: "Cart cannot be empty" });
+    }
+    if (!nonce || typeof nonce !== "string" || nonce.trim() === "") {
+      return res.status(400).send({ error: "Payment nonce required" });
+    }
+
+    const normalized = cart.map((item) => {
+      const productId = item?._id;
+      const name = String(item?.name || "");
+      const price = Number(item?.price);
+      const qty = Number(item?.quantity ?? 1);
+      if (!productId) throw new Error("Cart item missing product _id");
+      if (!Number.isFinite(price) || price < 0)
+        throw new Error("Invalid price in cart");
+      if (!Number.isInteger(qty) || qty < 1)
+        throw new Error("Invalid quantity in cart");
+      return { productId, name, price, quantity: qty };
+    });
+
+    const total = normalized.reduce((s, it) => s + it.price * it.quantity, 0);
+    const amount = (Math.round((total + Number.EPSILON) * 100) / 100).toFixed(
+      2
+    );
+
+    gateway.transaction.sale(
+      {
+        amount,
+        paymentMethodNonce: nonce,
+        options: { submitForSettlement: true },
+      },
+      async (error, result) => {
+        try {
+          if (error) {
+            console.error("Braintree error:", error);
+            return res
+              .status(500)
+              .send({ error: "Payment gateway error", message: error.message });
+          }
+          if (!result?.success) {
+            const details = {
+              message: result?.message,
+              processorResponseText: result?.transaction?.processorResponseText,
+              processorResponseCode: result?.transaction?.processorResponseCode,
+              status: result?.transaction?.status,
+            };
+            console.warn("Braintree transaction failed:", details);
+            return res
+              .status(500)
+              .send({ error: "Transaction failed", details });
+          }
+
+          const orderLines = normalized.map((it) => ({
+            product: it.productId,
+            quantity: it.quantity,
+            price: it.price,
+            name: it.name,
+          }));
+
+          const orderDoc = await new orderV2Model({
+            products: orderLines,
+            payment: result,
+            buyer: req.user._id,
+          }).save();
+
+          return res.json({ ok: true, orderId: orderDoc._id });
+        } catch (dbErr) {
+          console.error("Error saving V2 order:", dbErr);
+          return res.status(500).send({ error: "Failed to save order" });
+        }
+      }
+    );
+  } catch (err) {
+    console.error("Payment V2 controller error:", err);
+    return res.status(400).send({ error: err.message || "Invalid request" });
   }
 };
