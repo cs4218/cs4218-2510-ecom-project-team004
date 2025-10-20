@@ -23,6 +23,9 @@ const Login = () => {
       const res = await axios.post("/api/v1/auth/login", {
         email,
         password,
+      }, {
+        // Fix: failure message not shown if api sends 4xx status
+        validateStatus: (status) => status < 500 // only throw for 5xx
       });
       if (res && res.data.success) {
         toast.success(res.data && res.data.message, {

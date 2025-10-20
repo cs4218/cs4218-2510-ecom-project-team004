@@ -288,6 +288,7 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ message: 'Name is Required' });
     });
   
@@ -301,6 +302,7 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ message: 'Email is Required' });
     });
     
@@ -314,6 +316,7 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ message: 'Password is Required' });
     });
   
@@ -327,6 +330,7 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ message: 'Phone no is Required' });
     });
   
@@ -340,6 +344,7 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ message: 'Address is Required' });
     });
   
@@ -353,6 +358,7 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ message: 'Answer is Required' });
     });
   
@@ -367,6 +373,7 @@ describe('Register Controller', () => {
       await registerController(req, res);
   
       expect(userModel.findOne).toHaveBeenCalledWith({ email });
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Already Register please login' });
     });
   
@@ -390,6 +397,8 @@ describe('Register Controller', () => {
   
       await registerController(req, res);
   
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith({ success: true, message: 'User Register Successfully' });
     });
@@ -407,6 +416,8 @@ describe('Register Controller', () => {
       expect(userModel.findOne).toHaveBeenCalled();
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error in existing user check');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -424,6 +435,8 @@ describe('Register Controller', () => {
       expect(hashPassword).toHaveBeenCalled();
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error when hashing password');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -442,6 +455,8 @@ describe('Register Controller', () => {
       expect(mockSave).toHaveBeenCalled();
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error in user creation');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -470,8 +485,10 @@ describe('Login Controller', () => {
   
       await loginController(req, res);
   
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Invalid email or password' });
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Email and password are required' });
     });
   
     it('should send message when password is empty', async () => {
@@ -481,8 +498,10 @@ describe('Login Controller', () => {
   
       await loginController(req, res);
   
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Invalid email or password' });
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Email and password are required' });
     });
   
   })
@@ -514,6 +533,8 @@ describe('Login Controller', () => {
       expect(JWT.sign).toHaveBeenCalledWith({ _id: 'fakeId' }, process.env.JWT_SECRET, {
         expiresIn: "7d",
       });
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(200); // should send successful login response
       expect(res.send).toHaveBeenCalledWith({ 
         success: true, 
@@ -542,10 +563,12 @@ describe('Login Controller', () => {
       await loginController(req, res);
   
       expect(userModel.findOne).toHaveBeenCalledWith({ email: userInfo.email });
-      expect(res.status).toHaveBeenCalledWith(404); 
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(401); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
-        message: 'Email is not registered',
+        message: 'Invalid email or password',
         });
     });
   
@@ -564,10 +587,12 @@ describe('Login Controller', () => {
       expect(userModel.findOne).toHaveBeenCalledWith({ email: userInfo.email });
       expect(comparePassword).toHaveBeenCalledTimes(1);
       expect(comparePassword).toHaveBeenCalledWith(userInfo.password, 'fakeHashedPassword');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(401); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
-        message: 'Invalid Password',
+        message: 'Invalid email or password',
         });
     });
   
@@ -589,6 +614,8 @@ describe('Login Controller', () => {
       expect(userModel.findOne).toHaveBeenCalledWith({ email: userInfo.email }); 
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error in finding user');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -613,6 +640,8 @@ describe('Login Controller', () => {
       expect(comparePassword).toHaveBeenCalledTimes(1); 
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error when matching password');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -638,6 +667,8 @@ describe('Login Controller', () => {
       expect(JWT.sign).toHaveBeenCalledTimes(1); 
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error when signing token');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -666,7 +697,9 @@ describe('Forgot Password Controller', () => {
 
       await forgotPasswordController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({ message: 'Email is required' });
     });
 
@@ -677,7 +710,9 @@ describe('Forgot Password Controller', () => {
 
       await forgotPasswordController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({ message: 'answer is required' });
     });
 
@@ -688,7 +723,9 @@ describe('Forgot Password Controller', () => {
 
       await forgotPasswordController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({ message: 'New Password is required' });
     });
 
@@ -720,6 +757,8 @@ describe('Forgot Password Controller', () => {
       expect(hashPassword).toHaveBeenCalledWith(userInfo.password);
       expect(userModel.findByIdAndUpdate).toHaveBeenCalledTimes(1);  // should update user hashed password
       expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(user._id, { password: 'fakeNewHashedPassword' });
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(200); // should send successful reset password response
       expect(res.send).toHaveBeenCalledWith({ 
         success: true, 
@@ -741,6 +780,8 @@ describe('Forgot Password Controller', () => {
 
       expect(userModel.findOne).toHaveBeenCalledTimes(1);
       expect(userModel.findOne).toHaveBeenCalledWith({ email: userInfo.email, answer: userInfo.answer });
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(404); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -767,6 +808,8 @@ describe('Forgot Password Controller', () => {
       expect(userModel.findOne).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error when finding user');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -798,6 +841,8 @@ describe('Forgot Password Controller', () => {
       expect(hashPassword).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error when hashing password');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -831,6 +876,8 @@ describe('Forgot Password Controller', () => {
       expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(user._id, { password: 'fakeNewHashedPassword' });
       expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
       expect(logSpy).toHaveBeenCalledWith('Error when updating user info');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500); 
       expect(res.send).toHaveBeenCalledWith({ 
         success: false, 
@@ -855,7 +902,7 @@ describe('Test Controller', () => {
     const req = {}
     
     testController(req, res);
-
+    expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith('Protected Routes');
   })
 

@@ -12,6 +12,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      MONGO_URL: ${{ secrets.MONGO_URL }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -28,6 +31,9 @@ jobs:
         run: |
           cd client
           npm install
+          
+      - name: Install Playwright Browsers
+        run: npx playwright install
           
       - name: Run tests
         run: npm run test
