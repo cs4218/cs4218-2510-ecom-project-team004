@@ -59,14 +59,14 @@ describe("Admins can view and update orders.", () => {
 
         let res = await request(app).get("/api/v1/auth/all-orders").set("Authorization", `${adminToken}`);
         expect(res.statusCode).toBe(200);
+        // Check one order for this user.
+        const ordersForTestUser = res.body.filter((order) => {
+            return order.buyer._id == normal_user._id.toString();
+        })
 
-        res = await request(app).get("/api/v1/auth/orders").set("Authorization", `${adminToken}`).send({
-            user: { _id: normal_user._id }
-        });
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].buyer._id).toEqual(normal_user._id.toString());
-        expect(res.body[0].status).toBe("Not Process");
+        expect(ordersForTestUser).toHaveLength(1);
+        expect(ordersForTestUser[0].buyer._id).toEqual(normal_user._id.toString());
+        expect(ordersForTestUser[0].status).toBe("Not Process");
 
         res = await request(app).put(`/api/v1/auth/order-status/${order._id}`).set("Authorization", `${adminToken}`).send({
             status: "Shipped"

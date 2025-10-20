@@ -8,8 +8,10 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'LOGIN' }).click();
   await expect(page.locator('h1')).toContainText('All Products');
   await page.goto('http://localhost:3000/dashboard/admin/orders');
-  await page.getByText('Not Process').click();
-  await page.getByText('Processing').nth(1).click();
+  //await page.getByText('Not Process').click();
+  //await page.getByText('Processing').nth(1).click();
+  await page.locator('div:nth-child(40) > .table > tbody > tr > td:nth-child(2) > .ant-select > .ant-select-selector > .ant-select-selection-item').click();
+  await page.getByText('Processing').nth(2).click();
   await page.getByRole('button', { name: 'Test' }).click();
   await page.getByRole('link', { name: 'Logout' }).click();
   await page.getByRole('textbox', { name: 'Enter Your Email' }).fill('cs4218@test.com');
@@ -25,8 +27,10 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'LOGIN' }).click();
   await expect(page.locator('h1')).toContainText('All Products');
   await page.goto('http://localhost:3000/dashboard/admin/orders');
-  await page.getByText('Processing').click();
-  await page.getByText('Not Process').nth(1).click();
+  //await page.getByText('Processing').click();
+  //await page.getByText('Not Process').nth(1).click();
+  await page.getByText('Processing').nth(1).click();
+  await page.locator('.ant-select-item-option-content').first().click();
   await page.getByRole('button', { name: 'Test' }).click();
   await page.getByRole('link', { name: 'Logout' }).click();
   await page.getByRole('textbox', { name: 'Enter Your Email' }).fill('cs4218@test.com');
