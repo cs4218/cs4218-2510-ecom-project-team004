@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { hashPassword } from "../../helpers/authHelper";
-import app from "../../server";
+import { hashPassword } from "../../../helpers/authHelper";
+import app from "../../../server";
 import request from "supertest";
-import userModel from "../../models/userModel";
-import orderModel from "../../models/orderModel";
+import userModel from "../../../models/userModel";
+import orderModel from "../../../models/orderModel";
 
 describe("Admins can view and update orders.", () => {
     let adminToken;
