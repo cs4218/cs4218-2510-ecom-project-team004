@@ -135,7 +135,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   | Admin View Users | - | `adminViewUsers.spec.js` |
   | Page Layout | - | `pageLayout.spec.js` |
 
-  All integration and UI test files are in `__tests__/integration` and `__tests__/ui` directories respectively.
+  All integration and UI test files are in `__tests__/integration/backend` and `__tests__/ui` directories respectively.
 - **Law Rui Xi**:
   Added integration tests and UI tests relating to admin viewing/updating orders, and user viewing order status. Specifically, added, tested or modified the following parts:
   - Integration Tests:
