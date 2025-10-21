@@ -468,3 +468,166 @@ describe("Admin Update Product Integration Testing", () => {
         expect(upd.statusCode).toBe(500);
     });
 });
+
+describe("Admin View Products Integration Test", () => {
+    const makeBuffer = (n) => Buffer.alloc(n, 0xcc);
+
+    const seedProducts = async (n, { withPhotos = false, categorySlug = "default-cat" } = {}) => {
+        const cat = await categoryModel.create({ name: categorySlug, slug: categorySlug });
+        const created = [];
+        for (let i = 0; i < n; i++) {
+            const name = `Prod ${i + 1}`;
+            let reqb = request(app)
+                .post("/api/v1/product/create-product")
+                .set("Authorization", adminToken)
+                .field("name", name)
+                .field("description", `Desc ${i + 1}`)
+                .field("price", String(100 + i))
+                .field("quantity", String(1 + (i % 5)))
+                .field("category", cat._id.toString())
+                .field("shipping", String(i % 2));
+            if (withPhotos) {
+                reqb = reqb.attach("photo", makeBuffer(10_000), `p${i + 1}.jpg`);
+            }
+            const res = await reqb;
+            expect(res.statusCode).toBe(201);
+            created.push(res.body.products);
+        }
+        return { cat, created };
+    };
+
+    it("should list products (GET /get-product) without photos, sorted desc, limited to 12: 200", async () => {
+        // Create 15 products to test the 12-item limit
+        const { created } = await seedProducts(15, { withPhotos: false, categorySlug: "list-cat" });
+
+        const res = await request(app).get("/api/v1/product/get-product");
+        expect(res.statusCode).toBe(200);
+        expect(res.body?.success).toBe(true);
+        expect(Array.isArray(res.body?.products)).toBe(true);
+
+        // limit 12
+        expect(res.body.products.length).toBe(12);
+
+        for (const p of res.body.products) {
+            expect(p.photo).toBeUndefined();
+        }
+
+        const newestName = "Prod 15";
+        expect(res.body.products[0].name).toBe(newestName);
+        expect(res.body.countTotal).toBe(12);
+        expect((res.body.message || "").toLowerCase()).toContain("all products");
+    });
+
+    it("should get single product by slug (GET /get-product/:slug): 200", async () => {
+        const { created } = await seedProducts(1, { categorySlug: "single-cat" });
+        const prod = created[0];
+
+        const res = await request(app).get(`/api/v1/product/get-product/${prod.slug}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body?.success).toBe(true);
+        expect(res.body?.product?.slug).toBe(prod.slug);
+        expect(res.body?.product?.category?._id).toBeTruthy();
+    });
+
+    it("should return 404 for unknown product slug", async () => {
+        const res = await request(app).get("/api/v1/product/get-product/no-such-slug");
+        expect(res.statusCode).toBe(404);
+        expect(res.body?.success).toBe(false);
+    });
+
+    it("should return product photo for items with photo: 200", async () => {
+        const { created } = await seedProducts(1, { withPhotos: true, categorySlug: "photo-cat" });
+        const prod = created[0];
+
+        const res = await request(app).get(`/api/v1/product/product-photo/${prod._id}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.headers["content-type"]).toBeTruthy();
+    });
+
+    it("should return 404 photo not found when product has no photo", async () => {
+        const { created } = await seedProducts(1, { withPhotos: false, categorySlug: "no-photo-cat" });
+        const prod = created[0];
+
+        const res = await request(app).get(`/api/v1/product/product-photo/${prod._id}`);
+        expect(res.statusCode).toBe(404);
+        expect((res.body?.message || "").toLowerCase()).toContain("photo not found");
+    });
+
+    it("should paginate (GET /product-list/:page) with perPage=6: 200", async () => {
+        await seedProducts(13, { withPhotos: false, categorySlug: "page-cat" });
+
+        const page1 = await request(app).get("/api/v1/product/product-list/1");
+        expect(page1.statusCode).toBe(200);
+        expect(Array.isArray(page1.body?.products)).toBe(true);
+        expect(page1.body.products.length).toBe(6);
+        expect(page1.body.currentPage).toBe(1);
+        expect(page1.body.totalProducts).toBe(13);
+        expect(page1.body.totalPages).toBe(Math.ceil(13 / 6));
+
+        const page2 = await request(app).get("/api/v1/product/product-list/2");
+        expect(page2.statusCode).toBe(200);
+        expect(page2.body.products.length).toBe(6);
+        expect(page2.body.currentPage).toBe(2);
+
+        const page3 = await request(app).get("/api/v1/product/product-list/3");
+        expect(page3.statusCode).toBe(200);
+        expect(page3.body.products.length).toBe(1);
+        expect(page3.body.currentPage).toBe(3);
+    });
+
+    it("should reject invalid page number (<= 0): 400", async () => {
+        const res = await request(app).get("/api/v1/product/product-list/0");
+        expect(res.statusCode).toBe(400);
+        expect((res.body?.message || "").toLowerCase()).toContain("invalid page number");
+    });
+
+    it("should return product count (GET /product-count): 200", async () => {
+        await seedProducts(5, { withPhotos: false, categorySlug: "count-cat" });
+        const res = await request(app).get("/api/v1/product/product-count");
+        expect(res.statusCode).toBe(200);
+        expect(res.body?.success).toBe(true);
+        expect(typeof res.body?.total).toBe("number");
+        expect(res.body.total).toBeGreaterThanOrEqual(5);
+    });
+
+    it("should filter by category and price range (POST /product-filters): 200", async () => {
+        const { cat } = await seedProducts(3, { categorySlug: "filter-cat" });
+        const res = await request(app)
+            .post("/api/v1/product/product-filters")
+            .send({ checked: [cat._id.toString()], radio: [101, 102] });
+        expect(res.statusCode).toBe(200);
+        expect(res.body?.success).toBe(true);
+        expect(Array.isArray(res.body?.products)).toBe(true);
+        expect(res.body.products.length).toBe(2);
+    });
+
+    it("should get products by category slug (GET /product-category/:slug): 200", async () => {
+        const slug = "by-cat";
+        const { cat } = await seedProducts(2, { categorySlug: slug });
+        const other = await categoryModel.create({ name: "other", slug: "other" });
+        await request(app)
+            .post("/api/v1/product/create-product")
+            .set("Authorization", adminToken)
+            .field("name", "Other Prod")
+            .field("description", "x")
+            .field("price", "10")
+            .field("quantity", "1")
+            .field("category", other._id.toString())
+            .field("shipping", "1")
+            .attach("photo", makeBuffer(10_000), "o.jpg");
+
+        const res = await request(app).get(`/api/v1/product/product-category/${slug}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body?.success).toBe(true);
+        expect(res.body?.category?.slug).toBe(slug);
+        expect(Array.isArray(res.body?.products)).toBe(true);
+        expect(res.body.products.length).toBe(2);
+        expect(res.body.products[0]?.category?._id).toBe(cat._id.toString());
+    });
+
+    it("should 404 when category slug not found for product-category route", async () => {
+        const res = await request(app).get(`/api/v1/product/product-category/does-not-exist`);
+        expect(res.statusCode).toBe(404);
+        expect((res.body?.message || "").toLowerCase()).toContain("category not found");
+    });
+});
