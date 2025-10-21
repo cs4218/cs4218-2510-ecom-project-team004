@@ -69,7 +69,53 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 
 ### Milestone 2
 - 
--
+- **Daphne Shaine Wilhelmina:**
+
+  Added integration tests (with the help of GenAI) for cart management and checkout (payment) feature:
+  - `__tests__/integration/frontend/cartManagement.test.js`
+  - `__tests__/integration/backend/payment.test.js`
+
+  Found and fixed 2 bugs during integration testing:
+  1. The interaction of authentication and cart context is not logically persistent after login/logout.
+     The fixes implemented in the files, which are shown below:
+     - `components/Header.js`
+     - `context/cart.js`
+     - `pages/CartPage.js`
+     - `pages/CategoryProduct.js`
+     - `pages/HomePage.js`
+  2. Cart and order pages quantity (total) discrepancy when having duplicate products during checkout.
+     The fixes implemented in the files, which are shown below:
+     - `context/cart.js`
+     - `pages/CartPage.js`
+     - `pages/user/Orders.js`
+     - `controllers/orderV2Controller.js`
+     - `controllers/productController.js` (brainTreePaymentController)
+     - `models/orderV2Model.js`
+     - `routes/productRoutes.js`
+     - `routes/orderV2Routes.js`
+     
+     Notes:
+     - To see the fix when running the website, please add the flags below in your `client/.env` before `npm run dev` :
+
+       ```
+       REACT_APP_ORDERS_API_VERSION=v2
+       REACT_APP_PAYMENT_API_VERSION=v2
+       ```
+       
+     - The order entry will be inserted into orders_v2 (MongoDB).
+     - The end-to-end flow will still be the same:
+
+       Login -> Add the same product more than once to the cart -> Go to Cart Page -> Do payment successfully -> Navigate to Orders (User) page
+     
+  Added UI test for cart management and checkout feature:
+  - `__tests__/ui/cart_context_persistent.spec.js`
+  - `__tests__/ui/order_successful_history_with_duplicate_products_merged.spec.js`
+  - `__tests__/ui/order_successful_with_address_updated.spec.js`
+  - `__tests__/ui/order_successful.spec.js`
+  - `__tests__/ui/order_unsuccessful_with_empty_card_details.spec.js`
+  - `__tests__/ui/order_unsuccessful_with_incorrect_card_details.spec.js`
+  - `__tests__/ui/order_unsuccessful_without_login.spec.js`
+    
 - **Foo Lin Xuan:**
   Write integration, UI tests and fix relevant bugs for Registration, Login, Protected Routes, Admin View Users and Page Layout features.
   | Feature | Integration Test File | UI Tests File |
