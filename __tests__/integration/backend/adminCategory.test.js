@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import request from "supertest";
-import { hashPassword } from "../../helpers/authHelper.js";
-import userModel from "../../models/userModel.js";
-import categoryModel from "../../models/categoryModel.js";
-import app from "../../server";
+import { hashPassword } from "../../../helpers/authHelper.js";
+import userModel from "../../../models/userModel.js";
+import categoryModel from "../../../models/categoryModel.js";
+import app from "../../../server.js";
 
 let mongod;
 let adminToken;

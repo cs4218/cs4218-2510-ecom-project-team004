@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import request from "supertest";
-import { hashPassword } from "../../helpers/authHelper.js";
-import userModel from "../../models/userModel.js";
-import categoryModel from "../../models/categoryModel.js";
-import app from "../../server";
-import productModel from "../../models/productModel.js";
+import { hashPassword } from "../../../helpers/authHelper.js";
+import userModel from "../../../models/userModel.js";
+import categoryModel from "../../../models/categoryModel.js";
+import app from "../../../server.js";
+import productModel from "../../../models/productModel.js";
 
 let mongod;
 let adminToken;
