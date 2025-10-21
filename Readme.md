@@ -74,7 +74,16 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   I wrote unit tests and fixed issues for - Product Feature (ProductDetails.js, CategoryProduct.js, productModel.js, productController.js [getProduct, getSingleProduct, productPhoto, productFilters, productCount, productList, searchProduct, realtedProduct, productCategory]), and Search Feature (SearchInput.js, search.js, Search.js), Home Feature (HomePage.js).
 
 ### Milestone 2
-- 
+- **Taemur Baig**
+
+  Added integration tests (with the help of GenAI) for admin category management and admin product management:
+  - `__tests__/integration/backend/adminCategory.test.js`
+  - `__tests__/integration/backend/adminProduct.test.js`
+ 
+  Added UI tests for admin category management and admin product management:
+  - `__tests__/ui/admin_category_management.spec.js`
+  - `__tests__/ui/admin_product_management.spec.js`
+
 - **Daphne Shaine Wilhelmina:**
 
   Added integration tests (with the help of GenAI) for cart management and checkout (payment) feature:
