@@ -75,7 +75,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - `__tests__/integration/frontend/cartManagement.test.js`
   - `__tests__/integration/backend/payment.test.js`
 
-  Found and fixed 2 bugs during integration testing:
+  Found and fixed 2 major bugs during integration testing:
   1. The interaction of authentication and cart context is not logically persistent after login/logout.
      The fixes implemented in the files, which are shown below:
      - `components/Header.js`
