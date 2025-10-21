@@ -40,6 +40,8 @@ describe('Require Sign In', () => {
         expect(req).not.toHaveProperty('user');        // should not have user info
         expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
         expect(logSpy).toHaveBeenCalledWith('Error verifying token');
+        expect(res.status).toHaveBeenCalledTimes(1);  
+        expect(res.send).toHaveBeenCalledTimes(1);
         expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ 
             success: false, 
@@ -70,7 +72,7 @@ describe('Is Admin', () => {
         expect(next).toHaveBeenCalledTimes(1);
     });
 
-    it('should show unauthorized response when user is not admin', async () => {
+    it('should show forbidden response when user is not admin', async () => {
         const req = getMockReq({ user: {_id: 'fakeId'} });
         const { res, next } = getMockRes();
         userModel.findById.mockResolvedValueOnce({ role: 0 });
@@ -79,11 +81,13 @@ describe('Is Admin', () => {
 
         expect(userModel.findById).toHaveBeenCalledTimes(1);    // should check user
         expect(userModel.findById).toHaveBeenCalledWith('fakeId');
-        expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
-        expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Unauthorized Access' });
+        expect(res.status).toHaveBeenCalledTimes(1);  
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(res.status).toHaveBeenCalledWith(403);  // should send forbidden response
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: 'Admin role required for access' });
     });
 
-    it('should show unauthorized response on error', async () => {
+    it('should show server error response on error', async () => {
         const req = getMockReq({ user: {_id: 'fakeId'} });
         const { res, next } = getMockRes();
         userModel.findById.mockRejectedValueOnce('Error when checking user');
@@ -95,11 +99,13 @@ describe('Is Admin', () => {
         expect(userModel.findById).toHaveBeenCalledWith('fakeId');
         expect(logSpy).toHaveBeenCalledTimes(1);       // should send error to console
         expect(logSpy).toHaveBeenCalledWith('Error when checking user');
-        expect(res.status).toHaveBeenCalledWith(401);  // should send unauthorized response
+        expect(res.status).toHaveBeenCalledTimes(1);  
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(res.status).toHaveBeenCalledWith(500);  // should send unauthorized response
         expect(res.send).toHaveBeenCalledWith({ 
             success: false, 
             error: 'Error when checking user',
-            message: 'Error in admin middleware' 
+            message: 'Error when authorizing user' 
         });
     });
 })
