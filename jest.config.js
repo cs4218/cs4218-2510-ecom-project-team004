@@ -4,6 +4,7 @@ export default {
   projects: [
     "<rootDir>/jest.backend.config.js",
     "<rootDir>/jest.frontend.config.js",
-    "<rootDir>/jest.integration.config.js"
+    "<rootDir>/jest.integration.backend.config.js",
+    "<rootDir>/jest.integration.frontend.config.js",
   ]
 };

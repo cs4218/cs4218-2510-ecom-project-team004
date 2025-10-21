@@ -216,3 +216,20 @@ To begin unit testing with Jest in your project, follow these steps:
      ```bash
      npm run test
      ```
+
+## 7. Generating SonarQube Report
+
+To generate SonarQube report, follow these steps:
+
+1. Run tests with Jest (with coverage). **Note:** Jest configurations have been set up to collect coverage in separate directories in `/coverage/`. 
+
+2. Merge Jest coverage reports.
+    ```bash
+    npx lcov-result-merger 'coverage/**/lcov.info' 'coverage/lcov.info'
+    ```
+
+3. Run SonarQube Server
+
+4. Run SonarQube Scanner
+
+5. Click the link in the output to view the results.

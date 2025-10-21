@@ -28,4 +28,21 @@ module.exports = {
   },
   transformIgnorePatterns: ["<rootDir>/node_modules/"],
   clearMocks: true,
+
+  // jest code coverage
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "client/src/components/**",
+    "client/src/components/Routes/**",
+    "client/src/components/Form/**",
+    "client/src/pages/admin/**",
+    "client/src/pages/Auth/**",
+    "client/src/pages/**",
+    "client/src/pages/user/**",
+    "client/src/context/**",
+    "client/src/hooks/**",
+    "!**/*.test.js"
+  ],
+  coverageDirectory: "coverage/frontend-integration",
+
 };
