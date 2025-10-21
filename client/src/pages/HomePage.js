@@ -90,8 +90,8 @@ const HomePage = () => {
   };
 
   // FIXED: || --> && --- Don't think this is needed? The other useEffect() should handle
-  // useEffect(() => { 
-  //   if (!checked.length && !radio.length) getAllProducts(); 
+  // useEffect(() => {
+  //   if (!checked.length && !radio.length) getAllProducts();
   // }, [checked.length, radio.length]);
 
   // FIXED: Added else statement to reset products and total when no filters are applied
@@ -205,11 +205,12 @@ const HomePage = () => {
                   </div>
                   <p className="card-text ">
                     {/* FIXED: Added checks for description */}
-                    {p.description
-                      ? p.description.length > 60
-                        ? `${p.description.substring(0, 60)}...`   // Show "..." only if cut text
-                        : p.description                            // Show full text if it's short
-                      : "No description."                          // Show message if missing
+                    {
+                      p.description
+                        ? p.description.length > 60
+                          ? `${p.description.substring(0, 60)}...` // Show "..." only if cut text
+                          : p.description // Show full text if it's short
+                        : "No description." // Show message if missing
                     }
                   </p>
                   <div className="card-name-price">
@@ -222,11 +223,7 @@ const HomePage = () => {
                     <button
                       className="btn btn-dark ms-1"
                       onClick={() => {
-                        setCart([...cart, p]);
-                        localStorage.setItem(
-                          "cart",
-                          JSON.stringify([...cart, p])
-                        );
+                        setCart([...cart, { ...p, quantity: 1 }]);
                         toast.success("Item Added to cart");
                       }}
                     >

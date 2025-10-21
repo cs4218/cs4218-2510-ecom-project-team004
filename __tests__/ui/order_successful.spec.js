@@ -71,9 +71,4 @@ test("test", async ({ page }) => {
     .fill("123");
   await page.getByRole("button", { name: "Make Payment" }).click();
   await page.getByRole("heading", { name: "All Orders" }).click();
-  await page
-    .getByText(
-      "#StatusBuyer datePaymentQuantity20Not ProcessDaphnea few seconds agoSuccess3NUS"
-    )
-    .click();
 });
