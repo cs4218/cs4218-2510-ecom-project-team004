@@ -1,4 +1,4 @@
-// productControllers.js (Payment Faature Tests)
+// productControllers.js (Payment Feature Tests)
 // The tests below are generated with help from GenAI
 import {
   braintreeTokenController,
