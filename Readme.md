@@ -49,7 +49,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   - pages/Pagenotfound.test.js for pages/Pagenotfound.js
   - config/db.test.js for config/db.js
 - **Law Rui Xi:**
-  Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features. Specifically, added, modified or tested the following parts:
+  Added unit tests and fixed bugs and typos for General features (including the Private Route, UserMenu, Dashboard and User Model), as well as the Order features and the Profile features. Also, added integration tests and UI tests relating to admin viewing/updating orders, and user viewing order status. Specifically, added, modified or tested the following parts:
   - General features:
     - `components/Routes/Private.js`, `components/Routes/Private.test.js`
     - `components/userMenu.js`, `components/userMenu.test.js`
@@ -64,6 +64,12 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
       - `orderStatusController`
   - Profile features:
     - `pages/user/Profile.js`, `pages/user/Profile.test.js`
+  - Integration Tests:
+    - `__tests__/integration/backend/admin_update_order.test.js`
+    - `__tests__/integration/backend/order_creation.test.js`
+  - UI Tests:
+    - `__tests__/ui/admin_manage_order_successful.spec.js`
+    - `__tests__/ui/profile_update_successful.spec.js`
 - **Zhao Evan:**
   I wrote unit tests and fixed issues for - Product Feature (ProductDetails.js, CategoryProduct.js, productModel.js, productController.js [getProduct, getSingleProduct, productPhoto, productFilters, productCount, productList, searchProduct, realtedProduct, productCategory]), and Search Feature (SearchInput.js, search.js, Search.js), Home Feature (HomePage.js).
 
