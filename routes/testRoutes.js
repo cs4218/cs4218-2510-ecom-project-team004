@@ -8,7 +8,7 @@ router.post("/reset", async (req, res) => {
     await categoryModel.insertMany([
       { name: "Clothing", slug: "clothing" },
       { name: "Electronics", slug: "electronics" },
-      { name: "Toys", slug: "toys" },
+      { name: "Book", slug: "book" },
     ]);
     res.status(200).send({ success: true });
   } catch (err) {
