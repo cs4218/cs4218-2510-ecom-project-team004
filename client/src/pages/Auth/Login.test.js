@@ -155,8 +155,7 @@ describe('Login Component', () => {
 
       submitForm();
 
-      await waitFor(() => expect(axios.post)
-        .toHaveBeenCalledWith('/api/v1/auth/login', formData, expect.any(Object)));
+      await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/api/v1/auth/login', formData));
     });
 
     it('should login the user successfully', async () => {
