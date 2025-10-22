@@ -13,8 +13,6 @@ import {
 
 } from '../controllers/productController.js';
 
-import mongoose from 'mongoose'; // ADDED2
-
 // NOTE: The test setup was written with the help of an LLM
 
 // Mock dependencies
@@ -287,36 +285,6 @@ describe('productController Tests', () => {
   });
 
   describe('productPhotoController', () => {
-
-    // ADDED2
-    // NOTE: Had help from an LLM
-    // Setup
-
-    let mockReq;
-    let mockRes;
-
-    beforeAll(() => {
-      // Scoped to this describe block only
-      jest.spyOn(mongoose.Types.ObjectId, 'isValid').mockImplementation(() => true);
-    });
-
-    beforeEach(() => {
-      // Only resets for tests inside this describe
-      jest.clearAllMocks();
-
-      mockReq = {
-        params: { pid: 'product123' },
-      };
-
-      mockRes = {
-        status: jest.fn().mockReturnThis(),
-        send: jest.fn().mockReturnThis(),
-        set: jest.fn().mockReturnThis(),
-      };
-
-      productModel.findById = jest.fn();
-    });
-
     describe('Success Paths', () => {
       // NOTE: The test below was written with the help of an LLM
       test('should return photo when it exists', async () => {
@@ -1028,8 +996,7 @@ describe('productController Tests', () => {
     describe('Pagination', () => { // Equivalence Partitioning!
       // NOTE: The test below was written with the help of an LLM
       test('should handle first page (default)', async () => {
-        // mockReq.params = {}; // NO LONGER 2
-        mockReq.params.page = '1'; // ADDED2
+        mockReq.params = {};
         const mockProducts = Array(6).fill().map((_, i) => ({ _id: i, name: `Product ${i}` }));
 
         const mockQuery = {
@@ -1068,31 +1035,30 @@ describe('productController Tests', () => {
         expect(mockQuery.limit).toHaveBeenCalledWith(6);
       });
 
-      // NOTE: The test below was written with the help of an LLM 
-      // NO LONGER 2
-      // test('should default to page 1 when page is null', async () => {
-      //   mockReq.params.page = null;
-      //   const mockProducts = [];
+      // NOTE: The test below was written with the help of an LLM
+      test('should default to page 1 when page is null', async () => {
+        mockReq.params.page = null;
+        const mockProducts = [];
 
-      //   const mockQuery = {
-      //     select: jest.fn().mockReturnThis(),
-      //     skip: jest.fn().mockReturnThis(),
-      //     limit: jest.fn().mockReturnThis(),
-      //     sort: jest.fn().mockResolvedValue(mockProducts)
-      //   };
+        const mockQuery = {
+          select: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockResolvedValue(mockProducts)
+        };
 
-      //   productModel.find.mockReturnValue(mockQuery);
-      //   productModel.countDocuments.mockResolvedValue(0);
+        productModel.find.mockReturnValue(mockQuery);
+        productModel.countDocuments.mockResolvedValue(0);
 
-      //   await productListController(mockReq, mockRes);
+        await productListController(mockReq, mockRes);
 
-      //   expect(mockQuery.skip).toHaveBeenCalledWith(0);
-      //   expect(mockRes.send).toHaveBeenCalledWith(
-      //     expect.objectContaining({
-      //       currentPage: 1
-      //     })
-      //   );
-      // });
+        expect(mockQuery.skip).toHaveBeenCalledWith(0);
+        expect(mockRes.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            currentPage: 1
+          })
+        );
+      });
 
       // NOTE: The test below was written with the help of an LLM
       test('should handle decimal page numbers by parsing to integer', async () => {
@@ -1116,74 +1082,28 @@ describe('productController Tests', () => {
         expect(mockRes.status).toHaveBeenCalledWith(200);
       });
 
-      // NOTE: The test below was written with the help of an LLM
-      // NO LONGER 2
-      // test('should handle invalid page number gracefully', async () => {
-      //   mockReq.params.page = 'invalid';
-      //   const mockProducts = [];
+      test('should handle invalid page number gracefully', async () => {
+        mockReq.params.page = 'invalid';
+        const mockProducts = [];
 
-      //   const mockQuery = {
-      //     select: jest.fn().mockReturnThis(),
-      //     skip: jest.fn().mockReturnThis(),
-      //     limit: jest.fn().mockReturnThis(),
-      //     sort: jest.fn().mockResolvedValue(mockProducts)
-      //   };
+        const mockQuery = {
+          select: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockResolvedValue(mockProducts)
+        };
 
-      //   productModel.find.mockReturnValue(mockQuery);
+        productModel.find.mockReturnValue(mockQuery);
 
-      //   await productListController(mockReq, mockRes);
+        await productListController(mockReq, mockRes);
 
-      //   expect(mockQuery.skip).toHaveBeenCalledWith(0);
-      //   expect(mockRes.status).toHaveBeenCalledWith(200);
-      // });
-      
+        expect(mockQuery.skip).toHaveBeenCalledWith(0);
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+      });
 
     });
 
     describe('Error Paths', () => {
-      // ADDED2
-      test('should return 400 error when page is null', async () => {
-        mockReq.params.page = null;
-
-        await productListController(mockReq, mockRes);
-
-        expect(mockRes.status).toHaveBeenCalledWith(400);
-        expect(mockRes.send).toHaveBeenCalledWith({
-          success: false,
-          message: "Invalid page number",
-        });
-        expect(productModel.find).not.toHaveBeenCalled();
-      });
-
-      // ADDED2
-      test('should return 400 error for invalid page number', async () => {
-        mockReq.params.page = 'invalid';
-
-        await productListController(mockReq, mockRes);
-
-        expect(mockRes.status).toHaveBeenCalledWith(400);
-        expect(mockRes.send).toHaveBeenCalledWith({
-          success: false,
-          message: "Invalid page number",
-        });
-        expect(productModel.find).not.toHaveBeenCalled();
-      });
-
-      // ADDED2
-      // NOTE: The test below was written with the help of an LLM
-      test('should return 400 error when page params is empty/undefined', async () => {
-        mockReq.params = {};
-
-        await productListController(mockReq, mockRes);
-
-        expect(mockRes.status).toHaveBeenCalledWith(400);
-        expect(mockRes.send).toHaveBeenCalledWith({
-          success: false,
-          message: "Invalid page number",
-        });
-        expect(productModel.find).not.toHaveBeenCalled();
-      });
-
       // NOTE: The test below was written with the help of an LLM
       test('should handle pagination error', async () => {
         mockReq.params.page = '2';
@@ -1433,10 +1353,10 @@ describe('productController Tests', () => {
 
         await productCategoryController(mockReq, mockRes);
 
-        expect(productModel.find).not.toHaveBeenCalled();
+        expect(productModel.find).not.toHaveBeenCalled(); 
         expect(mockRes.status).toHaveBeenCalledWith(404);
         expect(mockRes.send).toHaveBeenCalledWith({
-          success: false,
+          success: false,  
           message: 'Category not found'
         });
       });
