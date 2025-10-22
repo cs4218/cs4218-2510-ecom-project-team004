@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import Product from '../../models/productModel.js';
-import Category from '../../models/categoryModel.js';
+import Product from '../../../models/productModel.js';
+import Category from '../../../models/categoryModel.js';
 
 // NOTE: The test setup was written with the help of an LLM
 

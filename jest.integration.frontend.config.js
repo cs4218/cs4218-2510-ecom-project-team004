@@ -2,9 +2,12 @@ module.exports = {
   displayName: "integration-frontend",
   rootDir: ".",
   testEnvironment: "jsdom",
-  testMatch: ["<rootDir>/__tests__/integration/frontend/**/*.test.js"],
+  testMatch: [
+    "<rootDir>/__tests__/integration/frontend/**/*.test.js",
+    "<rootDir>/client/__tests__/*.integration.test.js"
+  ],
   setupFilesAfterEnv: ["<rootDir>/__tests__/setup.integration.frontend.js"],
-  moduleDirectories: ["client/node_modules", "node_modules"],
+  moduleDirectories: ["<rootDir>/client/node_modules", "node_modules"],
   transform: {
     "^.+\\.(js|jsx)$": [
       "babel-jest",

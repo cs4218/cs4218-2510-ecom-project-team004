@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import express from 'express';
-import productRoutes from '../../routes/productRoutes.js';
-import Product from '../../models/productModel.js';
-import Category from '../../models/categoryModel.js';
-import User from '../../models/userModel.js';
+import productRoutes from '../../../routes/productRoutes.js';
+import Product from '../../../models/productModel.js';
+import Category from '../../../models/categoryModel.js';
+import User from '../../../models/userModel.js';
 
 // NOTE: The test setup was written with the help of an LLM
 
