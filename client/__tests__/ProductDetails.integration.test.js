@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 
 // NOTE: The test setup was written with the help of an LLM
 
+
 // Mock toast
 jest.mock("react-hot-toast");
 

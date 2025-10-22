@@ -9,6 +9,7 @@ import User from '../../models/userModel.js';
 
 // NOTE: The test setup was written with the help of an LLM
 
+
 let mongoServer;
 let testAdmin, testUser, testCategory, testProduct, testProduct2;
 
