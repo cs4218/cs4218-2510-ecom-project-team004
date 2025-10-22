@@ -35,6 +35,15 @@ export const updateCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     const { id } = req.params;
+
+    const trimmed = (name || "").trim();
+    if (!trimmed) {
+      return res.status(400).send({
+        success: false,
+        message: "Category name cannot be empty",
+      });
+    }
+
     const category = await categoryModel.findByIdAndUpdate(
       id,
       { name, slug: slugify(name) },
