@@ -340,8 +340,11 @@ export const productListController = async (req, res) => {
 
     // FIXED: Consistent default handling using parseInt()
     // NOTE: Had help from an LLM
-    const rawPage = Number.parseInt(req.params.page, 10);
-    const page = Number.isNaN(rawPage) ? 1 : rawPage;
+    //const page = parseInt(req.params.page) || 1;
+    // ADDED2
+    const rawPage = req.params.page;
+    const page = parseInt(rawPage, 10);
+
 
     // FIXED: Validate page number (reject negative/zero)
     // NOTE: Had help from an LLM
