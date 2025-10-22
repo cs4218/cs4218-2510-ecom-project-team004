@@ -15,7 +15,7 @@
     "test:integration:frontend": "cross-env NODE_ENV=test jest --config jest.integration.frontend.config.js",
     "test:integration": "npm run test:integration:backend && npm run test:integration:frontend",
     "test:ui": "npx playwright test __tests__/ui",
-    "test": "npm-run-all --continue-on-error test:backend test:frontend test:integration test:ui"
+    "test": "npm-run-all --continue-on-error test:backend test:frontend test:integration:backend test:integration:frontend test:ui"
   },
   "keywords": [],
   "author": "RP",
