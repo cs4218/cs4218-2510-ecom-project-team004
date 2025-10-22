@@ -9,6 +9,7 @@ import { rest } from "msw";
 
 // NOTE: The test setup was written with the help of an LLM
 
+
 // MSW Server Setup - This handles API calls instead of mocking axios
 const server = setupServer(
   rest.get("/api/v1/product/search/:keyword", (req, res, ctx) => {
