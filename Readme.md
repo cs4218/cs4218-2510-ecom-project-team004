@@ -68,8 +68,63 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   I wrote unit tests and fixed issues for - Product Feature (ProductDetails.js, CategoryProduct.js, productModel.js, productController.js [getProduct, getSingleProduct, productPhoto, productFilters, productCount, productList, searchProduct, realtedProduct, productCategory]), and Search Feature (SearchInput.js, search.js, Search.js), Home Feature (HomePage.js).
 
 ### Milestone 2
-- 
--
+- **Taemur Baig**
+
+  Added integration tests (with the help of GenAI) for admin category management and admin product management:
+  - `__tests__/integration/backend/adminCategory.test.js`
+  - `__tests__/integration/backend/adminProduct.test.js`
+ 
+  Added UI tests for admin category management and admin product management:
+  - `__tests__/ui/admin_category_management.spec.js`
+  - `__tests__/ui/admin_product_management.spec.js`
+
+- **Daphne Shaine Wilhelmina:**
+
+  Added integration tests (with the help of GenAI) for cart management and checkout (payment) feature:
+  - `__tests__/integration/frontend/cartManagement.test.js`
+  - `__tests__/integration/backend/payment.test.js`
+
+  Found and fixed 2 major bugs during integration testing:
+  1. The interaction of authentication and cart context is not logically persistent after login/logout.
+     The fixes implemented in the files, which are shown below:
+     - `components/Header.js`
+     - `context/cart.js`
+     - `pages/CartPage.js`
+     - `pages/CategoryProduct.js`
+     - `pages/HomePage.js`
+  2. Cart and order pages quantity (total) discrepancy when having duplicate products during checkout.
+     The fixes implemented in the files, which are shown below:
+     - `context/cart.js`
+     - `pages/CartPage.js`
+     - `pages/user/Orders.js`
+     - `controllers/orderV2Controller.js`
+     - `controllers/productController.js` (brainTreePaymentController)
+     - `models/orderV2Model.js`
+     - `routes/productRoutes.js`
+     - `routes/orderV2Routes.js`
+     
+     Notes:
+     - To see the fix when running the website, please add the flags below in your `client/.env` before `npm run dev` :
+
+       ```
+       REACT_APP_ORDERS_API_VERSION=v2
+       REACT_APP_PAYMENT_API_VERSION=v2
+       ```
+       
+     - The order entry will be inserted into orders_v2 (MongoDB).
+     - The end-to-end flow will still be the same:
+
+       Login -> Add the same product more than once to the cart -> Go to Cart Page -> Do payment successfully -> Navigate to Orders (User) page
+     
+  Added UI test for cart management and checkout feature:
+  - `__tests__/ui/cart_context_persistent.spec.js`
+  - `__tests__/ui/order_successful_history_with_duplicate_products_merged.spec.js`
+  - `__tests__/ui/order_successful_with_address_updated.spec.js`
+  - `__tests__/ui/order_successful.spec.js`
+  - `__tests__/ui/order_unsuccessful_with_empty_card_details.spec.js`
+  - `__tests__/ui/order_unsuccessful_with_incorrect_card_details.spec.js`
+  - `__tests__/ui/order_unsuccessful_without_login.spec.js`
+    
 - **Foo Lin Xuan:**
   Write integration, UI tests and fix relevant bugs for Registration, Login, Protected Routes, Admin View Users and Page Layout features.
   | Feature | Integration Test File | UI Tests File |
@@ -80,15 +135,22 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
   | Admin View Users | - | `adminViewUsers.spec.js` |
   | Page Layout | - | `pageLayout.spec.js` |
 
-  All integration and UI test files are in `__tests__/integration` and `__tests__/ui` directories respectively.
--
+  All integration and UI test files are in `__tests__/integration/backend` and `__tests__/ui` directories respectively.
+- **Law Rui Xi**:
+  Added integration tests and UI tests relating to admin viewing/updating orders, and user viewing order status. Specifically, added, tested or modified the following parts:
+  - Integration Tests:
+    - `__tests__/integration/backend/admin_update_order.test.js`
+    - `__tests__/integration/backend/order_creation.test.js`
+  - UI Tests:
+    - `__tests__/ui/admin_manage_order_successful.spec.js`
+    - `__tests__/ui/profile_update_successful.spec.js`
 - **Zhao Evan:**
   I wrote integration tests and fixed issues for - Product Feature (see __tests__/integration/ productModel.integration.test, productController.integration.test.js, productRoutes.integration.test.js), Search Feature (see client/__tests__/ context-search.integration.test.js, SearchInput.integration.test.js, page-search.integration.test.js), Home Feature (see client/__tests__/HomePage.integration.test.js).
   I also wrote UI tests for Home Page Browsing, Category Page Browsing Product Details Browsing, Search Browsing.
 
 ## 5. GitHub Workflow URL
 
-[GitHub Workflow](https://github.com/cs4218/cs4218-2510-ecom-project-team004/actions/runs/18255664528/job/51976561167)
+[GitHub Workflow](https://github.com/cs4218/cs4218-2510-ecom-project-team004/actions/runs/18684659500/job/53273971787)
 
 ## 6. Setting Up The Project
 
