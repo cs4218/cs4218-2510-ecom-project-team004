@@ -7,7 +7,7 @@ module.exports = {
     "<rootDir>/client/__tests__/*.integration.test.js"
   ],
   setupFilesAfterEnv: ["<rootDir>/__tests__/setup.integration.frontend.js"],
-  moduleDirectories: ["<rootDir>/client/node_modules", "node_modules"],
+  moduleDirectories: ["client/node_modules", "node_modules"],
   transform: {
     "^.+\\.(js|jsx)$": [
       "babel-jest",
